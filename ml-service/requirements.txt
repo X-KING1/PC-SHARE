@@ -1,0 +1,9 @@
+pandas
+numpy
+sentence-transformers
+scikit-learn
+torch
+schedule
+APScheduler
+pymongo
+flask

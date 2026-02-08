@@ -1,0 +1,31 @@
+{
+  "name": "learnhub-backend",
+  "version": "1.0.0",
+  "description": "LearnHub API Server - Node.js + Oracle",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "learnhub",
+    "oracle",
+    "express",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "express-session": "^1.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^7.0.12",
+    "oracledb": "^6.3.0",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12"
+  }
+}

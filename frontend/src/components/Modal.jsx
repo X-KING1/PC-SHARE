@@ -1,0 +1,44 @@
+// TuneCasa Modal Component Pattern
+// Reusable modal component with portal
+import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
+
+const Modal = ({ isOpen, onClose, children, title }) => {
+    // Close on escape key
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === 'Escape') onClose()
+        }
+
+        if (isOpen) {
+            document.addEventListener('keydown', handleEscape)
+            document.body.style.overflow = 'hidden'
+        }
+
+        return () => {
+            document.removeEventListener('keydown', handleEscape)
+            document.body.style.overflow = 'unset'
+        }
+    }, [isOpen, onClose])
+
+    if (!isOpen) return null
+
+    return createPortal(
+        <div className="modal-overlay" onClick={onClose}>
+            <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-header">
+                    {title && <h2 className="modal-title">{title}</h2>}
+                    <button className="modal-close" onClick={onClose}>
+                        ✕
+                    </button>
+                </div>
+                <div className="modal-content">
+                    {children}
+                </div>
+            </div>
+        </div>,
+        document.body
+    )
+}
+
+export default Modal
