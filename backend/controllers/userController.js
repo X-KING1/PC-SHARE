@@ -7,7 +7,7 @@ import { sendOTPEmail, sendWelcomeEmail } from '../services/emailService.js';
 
 // ==================== REGISTER ====================
 export const register = async (req, res) => {
-    const { name, email, password, skill_level } = req.body;
+    const { name, email, password, skill_level, role } = req.body;
 
     if (!name || !email || !password) {
         return res.status(400).json({ message: "Name, email, and password are required" });
@@ -36,12 +36,13 @@ export const register = async (req, res) => {
             username: name,
             email: email,
             password_hash: passwordHash,
-            skill_level: skill_level || 'Beginner'
+            skill_level: skill_level || 'Beginner',
+            role: role || 'student'
         });
 
         // Generate JWT token
         const token = jwt.sign(
-            { user_id: newUserId, email: email.toLowerCase() },
+            { user_id: newUserId, email: email.toLowerCase(), role: role || 'student' },
             JWT_SECRET,
             { expiresIn: JWT_EXPIRES_IN }
         );
@@ -52,7 +53,8 @@ export const register = async (req, res) => {
                 user_id: newUserId,
                 name,
                 email: email.toLowerCase(),
-                skill_level: skill_level || 'Beginner'
+                skill_level: skill_level || 'Beginner',
+                role: role || 'student'
             },
             token
         });
@@ -86,7 +88,7 @@ export const login = async (req, res) => {
 
         // Generate JWT token
         const token = jwt.sign(
-            { user_id: user.user_id, email: user.email },
+            { user_id: user.user_id, email: user.email, role: user.role || 'student' },
             JWT_SECRET,
             { expiresIn: JWT_EXPIRES_IN }
         );
@@ -97,7 +99,8 @@ export const login = async (req, res) => {
                 user_id: user.user_id,
                 name: user.username,
                 email: user.email,
-                skill_level: user.skill_level
+                skill_level: user.skill_level,
+                role: user.role || 'student'
             },
             token
         });
@@ -133,7 +136,8 @@ export const getCurrentUser = async (req, res) => {
                 user_id: user.user_id,
                 name: user.username,
                 email: user.email,
-                skill_level: user.skill_level
+                skill_level: user.skill_level,
+                role: user.role || 'student'
             }
         });
     } catch (error) {

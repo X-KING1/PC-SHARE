@@ -64,10 +64,11 @@ const Dashboard = () => {
 
     // Quick action buttons
     const quickActions = [
+        { icon: '🛒', label: 'Purchased Courses', to: '/purchased-courses', color: 'green' },
         { icon: '🎓', label: 'Browse Courses', to: ROUTES.COURSES, color: 'purple' },
         { icon: '📜', label: 'Certificates', to: '/certificate', color: 'yellow' },
         { icon: '📖', label: 'My Learning', to: '/my-learning', color: 'blue' },
-        { icon: '⚙️', label: 'Settings', to: '/settings', color: 'gray' }
+        { icon: '💬', label: 'Forum', to: '/forum', color: 'orange' },
     ]
 
     return (

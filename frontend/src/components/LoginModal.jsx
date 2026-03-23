@@ -139,16 +139,18 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
             toastShown.current = true
             toast.success('Welcome to SmartElearn!', { toastId: 'auth-success' })
             onClose()
-            navigate('/')
+            // Redirect based on role: admin → /admin, mentor → /mentor, student → /
+            const authUser = JSON.parse(localStorage.getItem('user') || '{}')
+            navigate(authUser.role === 'admin' ? '/admin' : authUser.role === 'mentor' ? '/mentor' : '/')
         }
     }, [status, navigate, onClose])
 
     useEffect(() => {
-        if (error) {
-            toast.error(error)
+        if (error && isOpen) {
+            toast.error(error, { toastId: 'auth-error' })
             dispatch(clearError())
         }
-    }, [error, dispatch])
+    }, [error, isOpen, dispatch])
 
     // Get modal title based on view
     const getTitle = () => {

@@ -89,3 +89,70 @@ export const rateCourse = async (req, res) => {
         res.status(500).json({ message: "Failed to save rating", error: error.message });
     }
 };
+
+// Get user's rating for a specific course
+export const getUserRating = async (req, res) => {
+    const { userId, courseId } = req.params;
+    try {
+        const rating = await Interaction.getUserRating(userId, courseId);
+        res.status(200).json({
+            message: "Rating fetched",
+            data: { rating: rating || 0 }
+        });
+    } catch (error) {
+        console.error('Get user rating error:', error);
+        res.status(500).json({ message: "Failed to fetch rating", error: error.message });
+    }
+};
+
+// Get comments for a course
+export const getComments = async (req, res) => {
+    const { courseId } = req.params;
+    try {
+        const comments = await Interaction.getCommentsByCourse(courseId);
+        res.status(200).json({
+            message: "Comments fetched",
+            data: comments
+        });
+    } catch (error) {
+        console.error('Get comments error:', error);
+        res.status(500).json({ message: "Failed to fetch comments", error: error.message });
+    }
+};
+
+// Add a comment to a course
+export const addComment = async (req, res) => {
+    const { user_id, course_id, comment_text } = req.body;
+    if (!user_id || !course_id || !comment_text) {
+        return res.status(400).json({ message: "user_id, course_id, and comment_text are required" });
+    }
+    try {
+        const commentId = await Interaction.addComment(user_id, course_id, comment_text);
+        res.status(201).json({
+            message: "Comment added",
+            data: { comment_id: commentId, user_id, course_id, comment_text }
+        });
+    } catch (error) {
+        console.error('Add comment error:', error);
+        res.status(500).json({ message: "Failed to add comment", error: error.message });
+    }
+};
+
+// Delete a comment (only own comments)
+export const deleteComment = async (req, res) => {
+    const { comment_id, user_id } = req.body;
+    if (!comment_id || !user_id) {
+        return res.status(400).json({ message: "comment_id and user_id are required" });
+    }
+    try {
+        const deleted = await Interaction.deleteComment(comment_id, user_id);
+        if (deleted) {
+            res.status(200).json({ message: "Comment deleted" });
+        } else {
+            res.status(404).json({ message: "Comment not found or not yours" });
+        }
+    } catch (error) {
+        console.error('Delete comment error:', error);
+        res.status(500).json({ message: "Failed to delete comment", error: error.message });
+    }
+};

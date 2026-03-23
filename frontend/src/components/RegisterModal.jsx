@@ -15,7 +15,8 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: ''
+        password: '',
+        role: 'student'
     })
     const [showPassword, setShowPassword] = useState(false)
     const toastShown = useRef(false)
@@ -25,7 +26,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         if (isOpen) {
             dispatch(resetStatus())
             toastShown.current = false
-            setFormData({ name: '', email: '', password: '' })
+            setFormData({ name: '', email: '', password: '', role: 'student' })
         }
     }, [isOpen, dispatch])
 
@@ -49,7 +50,8 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         dispatch(registerUser({
             name: formData.name,
             email: formData.email,
-            password: formData.password
+            password: formData.password,
+            role: formData.role
         }))
     }
 
@@ -59,16 +61,18 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
             toastShown.current = true
             toast.success('Welcome to SmartElearn!', { toastId: 'auth-success' })
             onClose()
-            navigate('/')
+            // Redirect mentors to /mentor, students to /
+            const authUser = JSON.parse(localStorage.getItem('user') || '{}')
+            navigate(authUser.role === 'mentor' ? '/mentor' : '/')
         }
     }, [status, navigate, onClose])
 
     useEffect(() => {
-        if (error) {
-            toast.error(error)
+        if (error && isOpen) {
+            toast.error(error, { toastId: 'auth-error' })
             dispatch(clearError())
         }
-    }, [error, dispatch])
+    }, [error, isOpen, dispatch])
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Sign up for SmartElearn">
@@ -117,6 +121,19 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                             {showPassword ? '🙈' : '👁️'}
                         </button>
                     </div>
+                </div>
+
+                <div className="form-group">
+                    <label>I am a</label>
+                    <select
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        className="form-input"
+                    >
+                        <option value="student">Student</option>
+                        <option value="mentor">Mentor / Instructor</option>
+                    </select>
                 </div>
 
                 <button

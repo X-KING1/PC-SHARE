@@ -17,7 +17,7 @@ export const baseApi = createApi({
         },
     }),
     // Tag types for cache invalidation
-    tagTypes: ['Course', 'Quiz', 'User', 'Category', 'Recommendation'],
+    tagTypes: ['Course', 'Quiz', 'User', 'Category', 'Recommendation', 'Payment', 'Comment', 'AdminStats', 'AdminUsers', 'AdminCourses', 'AdminPayments', 'AdminQuizzes', 'AdminForum', 'AdminSessions'],
     // Endpoints will be injected from separate files
     endpoints: () => ({}),
 });

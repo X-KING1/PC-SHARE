@@ -13,7 +13,7 @@ const CourseCard = ({ course }) => {
     const thumbnail = getThumbnail(course.youtube_url, 'HQ');
 
     return (
-        <div className="course-card animate-fade-in">
+        <Link to={`/course/${course.course_id}`} className="course-card animate-fade-in block no-underline text-inherit cursor-pointer">
             {/* Thumbnail */}
             <div className="h-40 overflow-hidden relative">
                 {thumbnail ? (
@@ -45,15 +45,12 @@ const CourseCard = ({ course }) => {
 
                 <div className="flex items-center justify-between mt-4">
                     <span className="text-xs text-gray-500">{course.level || 'Beginner'}</span>
-                    <Link
-                        to={`/course/${course.course_id}`}
-                        className="text-purple-400 hover:text-purple-300 text-sm font-semibold"
-                    >
+                    <span className="text-purple-400 hover:text-purple-300 text-sm font-semibold">
                         View Course →
-                    </Link>
+                    </span>
                 </div>
             </div>
-        </div>
+        </Link>
     )
 }
 

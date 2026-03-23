@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Post</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <div class="bg-white border-b sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-3 max-w-5xl">
+            <a href="/" class="text-gray-600 hover:text-gray-900 text-sm">&larr; Back to Forum</a>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-4 max-w-3xl">
+        <div class="bg-white rounded border">
+            <div class="px-4 py-3 border-b">
+                <h1 class="text-lg font-semibold text-gray-900">Create a Post</h1>
+            </div>
+
+            <form action="/threads" method="POST" enctype="multipart/form-data" class="p-4">
+                <div class="mb-4">
+                    <input type="text" name="author" required placeholder="Username" value="<%= currentUser || '' %>"
+                           class="w-full px-3 py-2 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                    <% if (currentUser) { %>
+                        <p class="text-xs text-gray-500 mt-1">Posting as: <%= currentUser %></p>
+                    <% } %>
+                </div>
+
+                <div class="mb-4">
+                    <input type="text" name="title" required placeholder="Title"
+                           class="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent">
+                </div>
+
+                <div class="mb-4">
+                    <textarea name="content" rows="8" required placeholder="Text (optional)"
+                              class="w-full px-3 py-2 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent resize-none"></textarea>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-xs text-gray-600 mb-1">Upload Image (Optional)</label>
+                    <input type="file" name="image" accept="image/*"
+                           class="w-full px-3 py-2 text-sm border rounded focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <p class="text-xs text-gray-500 mt-1">Max size: 5MB. Formats: JPG, PNG, GIF</p>
+                </div>
+
+                <div class="flex justify-end gap-2">
+                    <a href="/" class="px-6 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-full">
+                        Cancel
+                    </a>
+                    <button type="submit" class="bg-orange-500 text-white px-6 py-2 rounded-full hover:bg-orange-600 font-semibold text-sm">
+                        Post
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+

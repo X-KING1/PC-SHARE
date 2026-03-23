@@ -16,6 +16,8 @@ const Navbar = () => {
     const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false)
     const { user, isAuthenticated, logout } = useAuth()
     const navigate = useNavigate()
+    const isMentor = isAuthenticated && user?.role === 'mentor'
+    const isAdmin = isAuthenticated && user?.role === 'admin'
 
     // Fetch categories from database
     const { data: categories = [] } = useGetCategoriesQuery()
@@ -52,66 +54,87 @@ const Navbar = () => {
                         <span className="brand-text">SmartElearn</span>
                     </Link>
 
-                    {/* Explore Button with Dropdown */}
-                    <div
-                        className="explore-wrapper"
-                        onMouseEnter={() => setIsExploreOpen(true)}
-                        onMouseLeave={() => setIsExploreOpen(false)}
-                    >
-                        <button className="explore-btn">
-                            Explore
-                        </button>
+                    {/* Explore Button with Dropdown - hide for mentors */}
+                    {!isMentor && (
+                        <div
+                            className="explore-wrapper"
+                            onMouseEnter={() => setIsExploreOpen(true)}
+                            onMouseLeave={() => setIsExploreOpen(false)}
+                        >
+                            <button className="explore-btn">
+                                Explore
+                            </button>
 
-                        {/* Category Dropdown */}
-                        {isExploreOpen && (
-                            <div className="mega-menu">
-                                <div className="mega-menu-inner">
-                                    <div className="mega-column full-width">
-                                        <h3 className="mega-title">Browse Categories</h3>
-                                        <div className="category-grid">
-                                            {categories.map((category, index) => (
-                                                <button
-                                                    key={index}
-                                                    className="category-btn"
-                                                    onClick={() => handleCategoryClick(category)}
-                                                >
-                                                    {category}
-                                                </button>
-                                            ))}
+                            {/* Category Dropdown */}
+                            {isExploreOpen && (
+                                <div className="mega-menu">
+                                    <div className="mega-menu-inner">
+                                        <div className="mega-column full-width">
+                                            <h3 className="mega-title">Browse Categories</h3>
+                                            <div className="category-grid">
+                                                {categories.map((category, index) => (
+                                                    <button
+                                                        key={index}
+                                                        className="category-btn"
+                                                        onClick={() => handleCategoryClick(category)}
+                                                    >
+                                                        {category}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
+                                    <div className="mega-footer">
+                                        <span>Not sure where to begin?</span>
+                                        <Link to="/courses">Browse all courses</Link>
+                                    </div>
                                 </div>
-                                <div className="mega-footer">
-                                    <span>Not sure where to begin?</span>
-                                    <Link to="/courses">Browse all courses</Link>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Search Bar */}
-                    <form className="search-form" onSubmit={handleSearch}>
-                        <div className="search-wrapper">
-                            <input
-                                type="text"
-                                placeholder="What do you want to learn?"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="search-input"
-                            />
-                            <button type="submit" className="search-btn">
-                                🔍
-                            </button>
+                            )}
                         </div>
-                    </form>
+                    )}
+
+                    {/* Search Bar - hide for mentors */}
+                    {!isMentor && (
+                        <form className="search-form" onSubmit={handleSearch}>
+                            <div className="search-wrapper">
+                                <input
+                                    type="text"
+                                    placeholder="What do you want to learn?"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="search-input"
+                                />
+                                <button type="submit" className="search-btn">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                    )}
 
                     {/* Right Section */}
                     <div className="navbar-right">
                         {isAuthenticated ? (
                             <>
-                                <Link to="/my-learning" className="nav-link">
-                                    My Learning
-                                </Link>
+                                {isMentor ? (
+                                    <Link to="/mentor" className="nav-link" style={{ fontWeight: '700' }}>
+                                        👨‍🏫 Mentor Dashboard
+                                    </Link>
+                                ) : isAdmin ? (
+                                    <Link to="/admin" className="nav-link" style={{ fontWeight: '700' }}>
+                                        ⚡ Admin
+                                    </Link>
+                                ) : (
+                                    <>
+                                        <Link to="/my-learning" className="nav-link">
+                                            My Learning
+                                        </Link>
+                                        <Link to="/forum" className="nav-link">
+                                            Forum
+                                        </Link>
+                                    </>
+                                )}
                                 <Link to={ROUTES.DASHBOARD} className="user-btn">
                                     <div className="user-avatar-sm">
                                         {user?.name?.charAt(0)?.toUpperCase() || 'U'}
@@ -181,9 +204,19 @@ const Navbar = () => {
 
                         {isAuthenticated ? (
                             <>
-                                <Link to={ROUTES.DASHBOARD} onClick={() => setIsMenuOpen(false)}>
-                                    My Learning
-                                </Link>
+                                {isMentor ? (
+                                    <Link to="/mentor" onClick={() => setIsMenuOpen(false)}>
+                                        👨‍🏫 Mentor Dashboard
+                                    </Link>
+                                ) : isAdmin ? (
+                                    <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
+                                        ⚡ Admin Dashboard
+                                    </Link>
+                                ) : (
+                                    <Link to={ROUTES.DASHBOARD} onClick={() => setIsMenuOpen(false)}>
+                                        My Learning
+                                    </Link>
+                                )}
                                 <button onClick={logout}>Logout</button>
                             </>
                         ) : (

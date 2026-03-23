@@ -51,6 +51,49 @@ export const courseApi = baseApi.injectEndpoints({
             transformResponse: (response) => response.data || [],
             providesTags: (result, error, courseId) => [{ type: 'Recommendation', id: courseId }],
         }),
+
+        // POST /api/rate-course - Rate a course
+        rateCourse: build.mutation({
+            query: (body) => ({
+                url: '/rate-course',
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: (result, error, { course_id }) => [{ type: 'Course', id: course_id }],
+        }),
+
+        // GET /api/user-rating/:userId/:courseId - Get user's existing rating
+        getUserRating: build.query({
+            query: ({ userId, courseId }) => `/user-rating/${userId}/${courseId}`,
+            transformResponse: (response) => response.data?.rating || 0,
+        }),
+
+        // GET /api/comments/:courseId - Get comments for a course
+        getCourseComments: build.query({
+            query: (courseId) => `/comments/${courseId}`,
+            transformResponse: (response) => response.data || [],
+            providesTags: (result, error, courseId) => [{ type: 'Comment', id: courseId }],
+        }),
+
+        // POST /api/comments - Add a comment
+        addCourseComment: build.mutation({
+            query: (body) => ({
+                url: '/comments',
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: (result, error, { course_id }) => [{ type: 'Comment', id: course_id }],
+        }),
+
+        // POST /api/comments/delete - Delete a comment
+        deleteCourseComment: build.mutation({
+            query: (body) => ({
+                url: '/comments/delete',
+                method: 'POST',
+                body,
+            }),
+            invalidatesTags: (result, error, { course_id }) => [{ type: 'Comment', id: course_id }],
+        }),
     }),
     overrideExisting: false,
 });
@@ -62,4 +105,9 @@ export const {
     useGetCategoriesQuery,
     useGetCoursesByCategoryQuery,
     useGetRecommendationsQuery,
+    useRateCourseMutation,
+    useGetUserRatingQuery,
+    useGetCourseCommentsQuery,
+    useAddCourseCommentMutation,
+    useDeleteCourseCommentMutation,
 } = courseApi;
