@@ -2,6 +2,7 @@
 // Ported from web video/client/app.js into React
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { io } from 'socket.io-client'
+import config from '../config'
 
 const ICE_SERVERS = {
     iceServers: [
@@ -136,7 +137,7 @@ const VideoMeeting = ({ userName: defaultName, defaultRoom, defaultRole, onClose
             userNameRef.current = nameInput.trim()
 
             // Connect socket
-            const socket = io('http://localhost:5000')
+            const socket = io(config.API_BASE)
             socketRef.current = socket
 
             socket.on('connect', () => {

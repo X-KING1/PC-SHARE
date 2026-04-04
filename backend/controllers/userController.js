@@ -2,8 +2,35 @@
 import { User } from '../models/User.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import multer from 'multer';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { JWT_SECRET, JWT_EXPIRES_IN, SALT_ROUNDS, OTP_EXPIRES_MINUTES } from '../config/authConfig.js';
 import { sendOTPEmail, sendWelcomeEmail } from '../services/emailService.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Multer config for profile image uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, path.join(__dirname, '..', 'uploads', 'avatars'));
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `avatar_${req.user.user_id}_${Date.now()}${ext}`);
+    }
+});
+export const avatarUpload = multer({
+    storage,
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    fileFilter: (req, file, cb) => {
+        const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+        const ext = path.extname(file.originalname).toLowerCase();
+        if (allowed.includes(ext)) cb(null, true);
+        else cb(new Error('Only image files are allowed'));
+    }
+});
 
 // ==================== REGISTER ====================
 export const register = async (req, res) => {
@@ -137,12 +164,69 @@ export const getCurrentUser = async (req, res) => {
                 name: user.username,
                 email: user.email,
                 skill_level: user.skill_level,
-                role: user.role || 'student'
+                role: user.role || 'student',
+                profile_image: user.profile_image || null
             }
         });
     } catch (error) {
         console.error('Get current user error:', error);
         res.status(500).json({ message: "Failed to fetch user", error: error.message });
+    }
+};
+
+// ==================== UPDATE PROFILE ====================
+export const updateProfile = async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Not authenticated" });
+    }
+    try {
+        const { name, skill_level } = req.body;
+        await User.updateProfile(req.user.user_id, { name, skill_level });
+
+        const updatedUser = await User.findById(req.user.user_id);
+        const userData = {
+            user_id: updatedUser.user_id,
+            name: updatedUser.username,
+            email: updatedUser.email,
+            skill_level: updatedUser.skill_level,
+            role: updatedUser.role || 'student',
+            profile_image: updatedUser.profile_image || null
+        };
+
+        res.status(200).json({ message: "Profile updated successfully", data: userData });
+    } catch (error) {
+        console.error('Update profile error:', error);
+        res.status(500).json({ message: "Failed to update profile", error: error.message });
+    }
+};
+
+// ==================== UPLOAD PROFILE IMAGE ====================
+export const uploadProfileImage = async (req, res) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Not authenticated" });
+    }
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No image file uploaded" });
+        }
+
+        const imagePath = `/uploads/avatars/${req.file.filename}`;
+        await User.updateProfileImage(req.user.user_id, imagePath);
+
+        const updatedUser = await User.findById(req.user.user_id);
+        const userData = {
+            user_id: updatedUser.user_id,
+            name: updatedUser.username,
+            email: updatedUser.email,
+            skill_level: updatedUser.skill_level,
+            role: updatedUser.role || 'student',
+            profile_image: updatedUser.profile_image || null
+        };
+
+        res.status(200).json({ message: "Profile image uploaded successfully", data: userData });
+    } catch (error) {
+        console.error('Upload profile image error:', error);
+        res.status(500).json({ message: "Failed to upload image", error: error.message });
     }
 };
 

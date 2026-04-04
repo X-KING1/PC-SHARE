@@ -98,12 +98,19 @@ const RewardsSidebar = ({ currentLevel, levelScores, earnedBadges, recentBadge, 
                                         }`}
                                 >
                                     {/* Medal */}
-                                    <div className={`w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center ${badge.badge.type === 'gold'
-                                            ? 'bg-neutral-900'
-                                            : badge.badge.type === 'silver'
-                                                ? 'bg-neutral-400'
-                                                : 'bg-neutral-600'
-                                        }`}>
+                                    <div className="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center"
+                                        style={{
+                                            background: badge.badge.type === 'gold'
+                                                ? 'linear-gradient(135deg, #FFD700, #FFA500)'
+                                                : badge.badge.type === 'silver'
+                                                    ? 'linear-gradient(135deg, #C0C0C0, #E8E8E8)'
+                                                    : 'linear-gradient(135deg, #CD7F32, #B8860B)',
+                                            boxShadow: badge.badge.type === 'gold'
+                                                ? '0 2px 12px rgba(255,215,0,0.4)'
+                                                : badge.badge.type === 'silver'
+                                                    ? '0 2px 12px rgba(192,192,192,0.4)'
+                                                    : '0 2px 12px rgba(205,127,50,0.4)'
+                                        }}>
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                                         </svg>

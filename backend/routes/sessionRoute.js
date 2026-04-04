@@ -6,6 +6,7 @@ import {
     createSession,
     bookSession,
     completeSession,
+    updateSession,
     deleteSession
 } from '../controllers/sessionController.js';
 
@@ -25,6 +26,9 @@ router.put('/:id/book', bookSession);
 
 // Complete a session
 router.put('/:id/complete', completeSession);
+
+// Update session details
+router.put('/:id', updateSession);
 
 // Delete a session
 router.delete('/:id', deleteSession);

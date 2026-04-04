@@ -35,7 +35,7 @@ export const createStripePayment = async (req, res) => {
 
     try {
         const host = `${req.protocol}://${req.get('host')}`;
-        const frontendUrl = 'http://localhost:5173';
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
         // Create Stripe Checkout Session
         const session = await stripeService.createCheckoutSession({
@@ -44,7 +44,7 @@ export const createStripePayment = async (req, res) => {
             currency: currency || 'usd',
             courseId: course_id,
             userId: user_id,
-            successUrl: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}&provider=stripe`,
+            successUrl: `${frontendUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}&provider=stripe&course_id=${course_id}`,
             cancelUrl: `${frontendUrl}/payment-failure?reason=canceled`
         });
 
@@ -170,18 +170,23 @@ export const handleKhaltiCallback = async (req, res) => {
                 }
 
                 // Redirect to frontend success page
-                res.redirect(`http://localhost:5173/payment-success?pidx=${pidx}&amount=${amount}&order=${purchase_order_id}&provider=khalti`);
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                res.redirect(`${frontendUrl}/payment-success?pidx=${pidx}&amount=${amount}&order=${purchase_order_id}&provider=khalti`);
             } else {
-                res.redirect(`http://localhost:5173/payment-failure?reason=verification_failed`);
+                const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+                res.redirect(`${frontendUrl}/payment-failure?reason=verification_failed`);
             }
         } catch (error) {
             console.error('Khalti verification error:', error);
-            res.redirect(`http://localhost:5173/payment-failure?reason=verification_error`);
+            const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+            res.redirect(`${frontendUrl}/payment-failure?reason=verification_error`);
         }
     } else if (status === 'User canceled') {
-        res.redirect(`http://localhost:5173/payment-failure?reason=canceled`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/payment-failure?reason=canceled`);
     } else {
-        res.redirect(`http://localhost:5173/payment-failure?reason=${status || 'unknown'}`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/payment-failure?reason=${status || 'unknown'}`);
     }
 };
 

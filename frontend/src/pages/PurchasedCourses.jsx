@@ -5,7 +5,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import { useGetUserPaymentsQuery } from '../store/api/paymentApi'
 import { useGetCoursesQuery, useGetRecommendationsQuery, useRateCourseMutation, useGetUserRatingQuery, useGetCourseCommentsQuery, useAddCourseCommentMutation, useDeleteCourseCommentMutation } from '../store/api/courseApi'
-import { useGetQuizzesQuery } from '../store/api/quizApi'
+import { useGetQuizzesQuery, useGetCompletedQuizzesQuery } from '../store/api/quizApi'
 import CourseCardComponent from '../components/CourseCard'
 import { getVideoId, getThumbnail } from '../utils/youtube'
 import YouTubePlayer from '../components/YouTubePlayer'
@@ -73,6 +73,7 @@ const PurchasedCourses = () => {
     const courseComments = commentsError ? localComments : [...apiComments, ...localComments.filter(lc => !apiComments.some(ac => ac.text === lc.text && ac.user_id === lc.user_id))]
     const allCourses = coursesData?.courses || []
     const { data: quizzes = [] } = useGetQuizzesQuery(activeVideo?.course_id, { skip: !activeVideo?.course_id })
+    const { data: completedQuizIds = [] } = useGetCompletedQuizzesQuery(user?.user_id, { skip: !user?.user_id })
     const { data: sessions = [], refetch: refetchSessions } = useGetCourseSessionsQuery(activeVideo?.course_id, { skip: !activeVideo?.course_id })
     const [bookSession] = useBookSessionMutation()
 
@@ -285,12 +286,22 @@ const PurchasedCourses = () => {
                                                         <div className="bg-neutral-50">
                                                             {mod.items.map((quiz, i) => (
                                                                 <Link to={`/quiz/${quiz.quiz_id}`} key={quiz.quiz_id}
-                                                                    className="flex items-center gap-2.5 px-4 py-2.5 pl-10 hover:bg-neutral-100 transition-colors no-underline border-t border-neutral-100 group">
-                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                                                                        <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
-                                                                    </svg>
-                                                                    <span className="text-[12px] text-neutral-600 font-medium flex-1 truncate group-hover:text-neutral-900">{quiz.title}</span>
-                                                                    <span className="text-[10px] text-neutral-400 flex-shrink-0">{quiz.time_limit}m</span>
+                                                                    className={`flex items-center gap-2.5 px-4 py-2.5 pl-10 hover:bg-neutral-100 transition-colors no-underline border-t border-neutral-100 group ${completedQuizIds.includes(quiz.quiz_id) ? 'bg-emerald-50/50' : ''}`}>
+                                                                    {completedQuizIds.includes(quiz.quiz_id) ? (
+                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                                                                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" />
+                                                                        </svg>
+                                                                    ) : (
+                                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                                                                            <circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" />
+                                                                        </svg>
+                                                                    )}
+                                                                    <span className={`text-[12px] font-medium flex-1 truncate group-hover:text-neutral-900 ${completedQuizIds.includes(quiz.quiz_id) ? 'text-emerald-700' : 'text-neutral-600'}`}>{quiz.title}</span>
+                                                                    {completedQuizIds.includes(quiz.quiz_id) ? (
+                                                                        <span className="text-[9px] font-bold bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded flex-shrink-0">DONE</span>
+                                                                    ) : (
+                                                                        <span className="text-[10px] text-neutral-400 flex-shrink-0">{quiz.time_limit}m</span>
+                                                                    )}
                                                                 </Link>
                                                             ))}
                                                         </div>
@@ -617,31 +628,24 @@ const CourseCard = ({ course, isActive, onPlay }) => {
                 {/* Play overlay */}
                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 flex items-center justify-center transition-all duration-200">
                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all duration-200 shadow-lg">
-                        <PlayIcon />
+                        <PlayIcon size={16} />
                     </div>
                 </div>
-                {/* Badge */}
-                {isActive ? (
-                    <span className="absolute top-2.5 left-2.5 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide flex items-center gap-1 shadow-sm">
-                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" /> PLAYING
-                    </span>
-                ) : (
-                    <span className="absolute top-2.5 left-2.5 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded tracking-wide">
-                        OWNED
-                    </span>
+                {/* Active indicator */}
+                {isActive && (
+                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5 bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-lg">
+                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                        Playing
+                    </div>
                 )}
             </div>
-
             {/* Info */}
-            <div className="p-3.5">
-                <h3 className="text-[13px] font-semibold text-slate-900 leading-snug mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
-                    {course.title}
-                </h3>
-                <p className="text-[11px] text-slate-400 mb-2">{course.instructor}</p>
-                <div className="flex items-center gap-1.5">
-                    {course.category && (
-                        <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-medium">{course.category}</span>
-                    )}
+            <div className="p-4">
+                <h3 className="text-[14px] font-semibold text-slate-900 leading-snug line-clamp-2 mb-2">{course.title}</h3>
+                <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                    <span>{course.instructor}</span>
+                    <span className="w-0.5 h-0.5 bg-slate-300 rounded-full" />
+                    <span>{course.category}</span>
                 </div>
             </div>
         </div>

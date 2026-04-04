@@ -46,6 +46,16 @@ export const sessionApi = baseApi.injectEndpoints({
             invalidatesTags: ['Session'],
         }),
 
+        // PUT update session details
+        updateSession: build.mutation({
+            query: ({ id, ...data }) => ({
+                url: `/sessions/${id}`,
+                method: 'PUT',
+                body: data,
+            }),
+            invalidatesTags: ['Session'],
+        }),
+
         // DELETE session
         deleteSession: build.mutation({
             query: (id) => ({
@@ -64,5 +74,6 @@ export const {
     useCreateSessionMutation,
     useBookSessionMutation,
     useCompleteSessionMutation,
+    useUpdateSessionMutation,
     useDeleteSessionMutation,
 } = sessionApi;

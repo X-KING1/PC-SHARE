@@ -17,9 +17,13 @@ let pool = null;
 
 const connectOracle = async () => {
     try {
-        // Initialize Oracle client (for Windows)
+        // Initialize Oracle client (platform-aware)
         try {
-            oracledb.initOracleClient({ libDir: process.env.ORACLE_CLIENT_PATH || 'C:\\WINDOWS.X64_193000_db_home\\bin' });
+            const isLinux = process.platform === 'linux';
+            const defaultPath = isLinux
+                ? '/usr/lib/oracle/21/client64/lib'
+                : 'C:\\WINDOWS.X64_193000_db_home\\bin';
+            oracledb.initOracleClient({ libDir: process.env.ORACLE_CLIENT_PATH || defaultPath });
         } catch (err) {
             // Already initialized or thin mode
         }

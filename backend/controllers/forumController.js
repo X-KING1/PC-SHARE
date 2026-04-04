@@ -56,26 +56,31 @@ export const addReply = async (req, res) => {
     }
 };
 
-// POST /api/forum/threads/:id/upvote
-export const upvoteThread = async (req, res) => {
+// POST /api/forum/threads/:id/vote - Vote on thread (one per user)
+export const voteThread = async (req, res) => {
     try {
-        const result = await Forum.upvote(req.params.id);
+        const { user_id, vote_type } = req.body;
+        if (!user_id || !vote_type) {
+            return res.status(400).json({ success: false, message: 'user_id and vote_type required' });
+        }
+        const result = await Forum.vote(req.params.id, user_id, vote_type);
         const score = result.UPVOTES - result.DOWNVOTES;
-        res.json({ success: true, score });
+        res.json({ success: true, score, upvotes: result.UPVOTES, downvotes: result.DOWNVOTES, userVote: result.userVote });
     } catch (error) {
-        console.error('Error upvoting:', error);
+        console.error('Error voting:', error);
         res.status(500).json({ success: false, message: 'Error voting' });
     }
 };
 
-// POST /api/forum/threads/:id/downvote
-export const downvoteThread = async (req, res) => {
+// GET /api/forum/votes/:userId - Get user's votes
+export const getUserVotes = async (req, res) => {
     try {
-        const result = await Forum.downvote(req.params.id);
-        const score = result.UPVOTES - result.DOWNVOTES;
-        res.json({ success: true, score });
+        const votes = await Forum.getUserVotes(req.params.userId);
+        const voteMap = {};
+        votes.forEach(v => { voteMap[v.THREAD_ID] = v.VOTE_TYPE; });
+        res.json({ success: true, data: voteMap });
     } catch (error) {
-        console.error('Error downvoting:', error);
-        res.status(500).json({ success: false, message: 'Error voting' });
+        console.error('Error fetching votes:', error);
+        res.status(500).json({ success: false, message: 'Error fetching votes' });
     }
 };

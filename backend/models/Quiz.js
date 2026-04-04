@@ -1,5 +1,6 @@
 // Quiz Model - All quiz-related database operations
 import { getConnection } from '../config/oracle.js';
+import oracledb from 'oracledb';
 
 export const Quiz = {
     // Find quizzes by course ID
@@ -7,38 +8,43 @@ export const Quiz = {
         const connection = await getConnection();
         try {
             const result = await connection.execute(
-                `SELECT quiz_id, title, description, passing_score, time_limit_minutes 
-                 FROM quizzes WHERE course_id = :courseId ORDER BY quiz_id`,
-                { courseId }
+                `SELECT * FROM quizzes WHERE course_id = :courseId ORDER BY quiz_id`,
+                { courseId },
+                { outFormat: oracledb.OUT_FORMAT_OBJECT } // OUT_FORMAT_OBJECT
             );
 
-            const columns = ['quiz_id', 'title', 'description', 'passing_score', 'time_limit'];
-            return result.rows.map(row => {
-                const obj = {};
-                columns.forEach((col, i) => obj[col] = row[i]);
-                return obj;
-            });
+            return result.rows.map(row => ({
+                quiz_id: row.QUIZ_ID,
+                title: row.TITLE,
+                description: row.DESCRIPTION,
+                passing_score: row.PASSING_SCORE,
+                time_limit: row.TIME_LIMIT_MINUTES || 30
+            }));
         } finally {
             await connection.close();
         }
     },
 
-    // Find single quiz by ID
     findById: async (id) => {
         const connection = await getConnection();
         try {
             const result = await connection.execute(
-                `SELECT quiz_id, course_id, title, description, passing_score, time_limit_minutes 
-                 FROM quizzes WHERE quiz_id = :id`,
-                { id }
+                `SELECT * FROM quizzes WHERE quiz_id = :id`,
+                { id },
+                { outFormat: oracledb.OUT_FORMAT_OBJECT }
             );
 
             if (result.rows.length < 1) return null;
 
-            const columns = ['quiz_id', 'course_id', 'title', 'description', 'passing_score', 'time_limit'];
-            const quiz = {};
-            columns.forEach((col, i) => quiz[col] = result.rows[0][i]);
-            return quiz;
+            const row = result.rows[0];
+            return {
+                quiz_id: row.QUIZ_ID,
+                course_id: row.COURSE_ID,
+                title: row.TITLE,
+                description: row.DESCRIPTION,
+                passing_score: row.PASSING_SCORE,
+                time_limit: row.TIME_LIMIT_MINUTES || 30
+            };
         } finally {
             await connection.close();
         }

@@ -9,7 +9,10 @@ import {
     getCurrentUser,
     forgotPassword,
     resetPassword,
-    fetchSingleUser
+    fetchSingleUser,
+    updateProfile,
+    uploadProfileImage,
+    avatarUpload
 } from '../controllers/userController.js';
 
 const router = Router();
@@ -23,6 +26,8 @@ router.route('/reset-password').post(errorHandler(resetPassword));
 
 // Protected routes (auth required)
 router.route('/me').get(requireAuth, errorHandler(getCurrentUser));
+router.route('/me').put(requireAuth, errorHandler(updateProfile));
+router.route('/me/avatar').post(requireAuth, avatarUpload.single('avatar'), errorHandler(uploadProfileImage));
 router.route('/:id').get(errorHandler(fetchSingleUser));
 
 export default router;

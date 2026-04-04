@@ -71,6 +71,20 @@ export const completeSession = async (req, res) => {
     }
 };
 
+// Update session details
+export const updateSession = async (req, res) => {
+    const { id } = req.params;
+    const { title, session_date, start_time, duration_minutes, course_id } = req.body;
+
+    try {
+        await LiveSession.update(id, { title, session_date, start_time, duration_minutes, course_id });
+        res.status(200).json({ message: 'Session updated successfully' });
+    } catch (error) {
+        console.error('Update session error:', error);
+        res.status(500).json({ message: 'Failed to update session', error: error.message });
+    }
+};
+
 // Delete session
 export const deleteSession = async (req, res) => {
     try {

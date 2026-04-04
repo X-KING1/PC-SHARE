@@ -1,50 +1,52 @@
-// Forum Page — Clean Premium B&W Redesign
-// Tailwind CSS · Inter font · Black & White · All features preserved
-import { useState, useRef } from 'react'
+// Forum Page — Premium Black & White Redesign
+// Inter font · Minimal accents · Large images · Clean layout
+import { useState, useRef, useEffect } from 'react'
 import useAuth from '../hooks/useAuth'
 import {
     useGetThreadsQuery,
     useGetThreadQuery,
+    useGetUserVotesQuery,
     useCreateThreadMutation,
     useAddReplyMutation,
-    useUpvoteThreadMutation,
-    useDownvoteThreadMutation,
+    useVoteThreadMutation,
     useDeleteThreadMutation,
     useDeleteReplyMutation,
 } from '../store/api/forumApi'
 
-/* ─── Outline Icons ─────────────────────────────────────── */
-const ChevronUp = ({ active }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={active ? '#171717' : '#a3a3a3'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="18 15 12 9 6 15" />
+/* ─── Icons ─── */
+const UpArrow = ({ active }) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill={active ? '#ff4500' : 'none'} stroke={active ? '#ff4500' : '#878a8c'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 19V5M5 12l7-7 7 7" />
     </svg>
 )
-const ChevronDown = ({ active }) => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={active ? '#171717' : '#a3a3a3'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="6 9 12 15 18 9" />
+const DownArrow = ({ active }) => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill={active ? '#7193ff' : 'none'} stroke={active ? '#7193ff' : '#878a8c'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 5v14M19 12l-7 7-7-7" />
     </svg>
 )
 const ChatIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
     </svg>
 )
 const LinkIcon = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
         <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
     </svg>
 )
 const ImageIcon = () => (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
     </svg>
 )
 const TrashIcon = () => (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
     </svg>
 )
+
+const F = "'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif"
 
 const Forum = () => {
     const { user, isAuthenticated } = useAuth()
@@ -63,14 +65,21 @@ const Forum = () => {
 
     const { data: threads = [], isLoading } = useGetThreadsQuery()
     const { data: threadDetail } = useGetThreadQuery(activeThread, { skip: !activeThread })
+    const { data: serverVotes } = useGetUserVotesQuery(user?.user_id, { skip: !user?.user_id })
     const [createThread, { isLoading: creating }] = useCreateThreadMutation()
     const [addReply, { isLoading: replying }] = useAddReplyMutation()
-    const [upvoteThread] = useUpvoteThreadMutation()
-    const [downvoteThread] = useDownvoteThreadMutation()
+    const [voteThread] = useVoteThreadMutation()
     const [deleteThread] = useDeleteThreadMutation()
     const [deleteReply] = useDeleteReplyMutation()
 
-    /* ── helpers ─────────────────────────────────────────── */
+    // Load existing votes from server
+    useEffect(() => {
+        if (serverVotes) setUserVotes(serverVotes)
+    }, [serverVotes])
+
+    const votingRef = useRef(false)
+
+    /* ── Helpers ── */
     const handleImageSelect = (e, setImages, setPreviews, currentImages) => {
         const files = Array.from(e.target.files)
         if (currentImages.length + files.length > 5) { alert('Maximum 5 images allowed'); return }
@@ -79,7 +88,22 @@ const Forum = () => {
         setImages(p => [...p, ...vf]); setPreviews(p => [...p, ...vp]); e.target.value = ''
     }
     const removeImage = (i, setI, setP) => { setI(p => p.filter((_, x) => x !== i)); setP(p => p.filter((_, x) => x !== i)) }
-    const handleVote = (id, dir) => { if (userVotes[id] === dir) return; dir === 'up' ? upvoteThread(id) : downvoteThread(id); setUserVotes(p => ({ ...p, [id]: dir })) }
+    const handleVote = async (id, dir) => {
+        if (!user?.user_id) return
+        if (userVotes[id] === dir) return
+        if (votingRef.current) return
+        votingRef.current = true
+        try {
+            const result = await voteThread({ threadId: id, user_id: user.user_id, vote_type: dir }).unwrap()
+            setUserVotes(p => ({ ...p, [id]: result.userVote }))
+        } catch (err) { console.error(err) }
+        finally { votingRef.current = false }
+    }
+    const parseImages = (url) => {
+        if (!url) return []
+        try { const parsed = JSON.parse(url); return Array.isArray(parsed) ? parsed : [url] }
+        catch { return [url] }
+    }
 
     const handleCreateThread = async (e) => {
         e.preventDefault(); if (!newTitle.trim() || !newContent.trim()) return
@@ -104,38 +128,67 @@ const Forum = () => {
         return fmt(d)
     }
 
-    /* ── avatar ──────────────────────────────────────────── */
+    /* ── Avatar ── */
     const Avatar = ({ name, size = 'sm' }) => {
-        const dim = size === 'lg' ? 'w-10 h-10 text-[13px]' : 'w-8 h-8 text-[11px]'
+        const s = size === 'lg' ? { w: '44px', h: '44px', fs: '15px' } : { w: '36px', h: '36px', fs: '13px' }
         return (
-            <div className={`${dim} rounded-full bg-neutral-900 text-white flex items-center justify-center font-bold shrink-0`}>
+            <div style={{
+                width: s.w, height: s.h, borderRadius: '50%', background: '#111', color: 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700,
+                fontSize: s.fs, flexShrink: 0, fontFamily: F
+            }}>
                 {name?.[0]?.toUpperCase() || 'U'}
             </div>
         )
     }
 
-    /* ── image previews ──────────────────────────────────── */
+    /* ── Image Previews ── */
     const ImagePreviews = ({ previews, onRemove, setImages, setPreviews }) => (
         previews.length > 0 && (
-            <div className="flex gap-2 flex-wrap mt-3">
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
                 {previews.map((p, i) => (
-                    <div key={i} className="relative group">
-                        <img src={p} alt="" className="w-[72px] h-[56px] object-cover rounded-lg border border-neutral-200" />
+                    <div key={i} style={{ position: 'relative' }}>
+                        <img src={p} alt="" style={{ width: '80px', height: '64px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #e5e5e5' }} />
                         <button type="button" onClick={() => onRemove(i, setImages, setPreviews)}
-                            className="absolute -top-1.5 -right-1.5 w-[18px] h-[18px] bg-neutral-900 text-white rounded-full text-[9px] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+                            style={{ position: 'absolute', top: '-6px', right: '-6px', width: '20px', height: '20px', background: '#111', color: 'white', border: 'none', borderRadius: '50%', fontSize: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                     </div>
                 ))}
             </div>
         )
     )
 
+    /* ── Render Images ── */
+    const RenderImages = ({ images, large }) => {
+        const imgs = parseImages(images)
+        if (imgs.length === 0) return null
+        return (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginTop: large ? '20px' : '12px' }}>
+                {imgs.map((img, i) => (
+                    <img key={i} src={img} alt=""
+                        onClick={() => window.open(img, '_blank')}
+                        style={{
+                            maxWidth: large ? '100%' : '100%',
+                            maxHeight: large ? '500px' : '320px',
+                            objectFit: 'contain', borderRadius: '14px', cursor: 'pointer',
+                            background: '#fafafa', border: '1px solid #eee',
+                            transition: 'transform .2s', width: '100%'
+                        }}
+                        onMouseEnter={e => e.target.style.transform = 'scale(1.01)'}
+                        onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                    />
+                ))}
+            </div>
+        )
+    }
+
     // ─── NOT AUTHENTICATED ──────────────────────────────────
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-white flex items-center justify-center" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-                <div className="text-center px-6">
-                    <h2 className="text-[28px] font-bold text-neutral-900 mb-2 tracking-tight">Forum</h2>
-                    <p className="text-neutral-500 text-[15px]">Sign in to join the discussion</p>
+            <div style={{ minHeight: '100vh', background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: F }}>
+                <div style={{ textAlign: 'center', padding: '0 24px' }}>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '18px', background: '#111', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '24px' }}>💬</div>
+                    <h2 style={{ fontSize: '28px', fontWeight: 800, color: '#111', margin: '0 0 8px', letterSpacing: '-0.5px' }}>Discussion Forum</h2>
+                    <p style={{ color: '#888', fontSize: '15px', margin: 0 }}>Sign in to join the discussion</p>
                 </div>
             </div>
         )
@@ -145,120 +198,131 @@ const Forum = () => {
     if (activeThread && threadDetail) {
         const score = (threadDetail.UPVOTES || 0) - (threadDetail.DOWNVOTES || 0)
         return (
-            <div className="min-h-screen bg-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-
-                {/* Thin top accent */}
-                <div className="h-[3px] bg-neutral-900" />
-
-                <div className="max-w-[760px] mx-auto px-5 pt-8 pb-20">
+            <div style={{ minHeight: '100vh', background: '#fafafa', fontFamily: F }}>
+                <div style={{ maxWidth: '820px', margin: '0 auto', padding: '40px 24px 80px' }}>
 
                     {/* Back */}
                     <button onClick={() => setActiveThread(null)}
-                        className="inline-flex items-center gap-1.5 text-neutral-400 hover:text-neutral-900 text-[13px] font-medium mb-8 transition-colors group">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:-translate-x-0.5 transition-transform"><polyline points="15 18 9 12 15 6" /></svg>
-                        All discussions
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#888', fontSize: '13px', fontWeight: 600, cursor: 'pointer', marginBottom: '32px', fontFamily: F, padding: 0 }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+                        Back to discussions
                     </button>
 
-                    {/* Post */}
-                    <article>
-                        <div className="flex items-center gap-3 mb-5">
+                    {/* Post Card */}
+                    <article style={{ background: 'white', borderRadius: '20px', padding: '36px', boxShadow: '0 2px 12px rgba(0,0,0,.04)', border: '1px solid #eee' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
                             <Avatar name={threadDetail.AUTHOR} size="lg" />
-                            <div>
-                                <p className="font-semibold text-neutral-900 text-[14px] leading-none mb-1">{threadDetail.AUTHOR}</p>
-                                <p className="text-neutral-400 text-[12px]">{fmt(threadDetail.CREATED_DATE)}</p>
+                            <div style={{ flex: 1 }}>
+                                <p style={{ fontWeight: 700, color: '#111', fontSize: '15px', margin: '0 0 2px' }}>{threadDetail.AUTHOR}</p>
+                                <p style={{ color: '#999', fontSize: '12px', margin: 0 }}>{fmt(threadDetail.CREATED_DATE)}</p>
                             </div>
                             {user?.name === threadDetail.AUTHOR && (
                                 <button onClick={() => handleDeleteThread(activeThread)}
-                                    className="ml-auto flex items-center gap-1.5 text-neutral-400 hover:text-red-500 text-[12px] font-medium transition-colors">
+                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'none', border: '1px solid #eee', borderRadius: '10px', color: '#999', fontSize: '12px', fontWeight: 600, cursor: 'pointer', padding: '8px 14px', fontFamily: F, transition: 'all .2s' }}
+                                    onMouseEnter={e => { e.target.style.borderColor = '#fca5a5'; e.target.style.color = '#ef4444' }}
+                                    onMouseLeave={e => { e.target.style.borderColor = '#eee'; e.target.style.color = '#999' }}>
                                     <TrashIcon /> Delete
                                 </button>
                             )}
                         </div>
 
-                        <h1 className="text-[24px] font-bold text-neutral-900 leading-[1.3] tracking-tight mb-4">{threadDetail.TITLE}</h1>
-                        <div className="text-neutral-600 text-[15px] leading-[1.75] whitespace-pre-wrap">{threadDetail.CONTENT}</div>
+                        <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#111', lineHeight: 1.3, letterSpacing: '-0.5px', margin: '0 0 16px' }}>{threadDetail.TITLE}</h1>
+                        <div style={{ color: '#444', fontSize: '15px', lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>{threadDetail.CONTENT}</div>
 
-                        {threadDetail.IMAGE_URL && (
-                            <img src={threadDetail.IMAGE_URL} alt=""
-                                className="mt-6 w-full max-h-[420px] object-contain bg-neutral-50 rounded-xl cursor-pointer border border-neutral-100"
-                                onClick={() => window.open(threadDetail.IMAGE_URL, '_blank')} />
-                        )}
+                        <RenderImages images={threadDetail.IMAGE_URL} large />
 
-                        {/* Actions */}
-                        <div className="flex items-center gap-3 mt-8 pt-6 border-t border-neutral-100">
-                            <div className="inline-flex items-center border border-neutral-200 rounded-full divide-x divide-neutral-200">
+                        {/* Actions Bar */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '28px', paddingTop: '24px', borderTop: '1px solid #f0f0f0' }}>
+                            <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f6f7f8', borderRadius: '24px', overflow: 'hidden' }}>
                                 <button onClick={() => handleVote(activeThread, 'up')}
-                                    className={`px-2.5 py-1.5 rounded-l-full transition-colors hover:bg-neutral-50 ${userVotes[activeThread] === 'up' ? 'bg-neutral-100' : ''}`}>
-                                    <ChevronUp active={userVotes[activeThread] === 'up'} />
+                                    style={{ padding: '10px 14px', background: userVotes[activeThread] === 'up' ? '#ffe9e0' : 'transparent', border: 'none', cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', borderRadius: '24px 0 0 24px' }}
+                                    onMouseEnter={e => { if (userVotes[activeThread] !== 'up') e.target.style.background = '#f0f0f0' }}
+                                    onMouseLeave={e => { if (userVotes[activeThread] !== 'up') e.target.style.background = 'transparent' }}>
+                                    <UpArrow active={userVotes[activeThread] === 'up'} />
                                 </button>
-                                <span className="px-3 text-[13px] font-semibold text-neutral-900 tabular-nums">{score}</span>
+                                <span style={{ padding: '0 6px', fontSize: '14px', fontWeight: 800, color: userVotes[activeThread] === 'up' ? '#ff4500' : userVotes[activeThread] === 'down' ? '#7193ff' : '#1a1a1b', fontFamily: F, minWidth: '28px', textAlign: 'center' }}>{score}</span>
                                 <button onClick={() => handleVote(activeThread, 'down')}
-                                    className={`px-2.5 py-1.5 rounded-r-full transition-colors hover:bg-neutral-50 ${userVotes[activeThread] === 'down' ? 'bg-neutral-100' : ''}`}>
-                                    <ChevronDown active={userVotes[activeThread] === 'down'} />
+                                    style={{ padding: '10px 14px', background: userVotes[activeThread] === 'down' ? '#dde5ff' : 'transparent', border: 'none', cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', borderRadius: '0 24px 24px 0' }}
+                                    onMouseEnter={e => { if (userVotes[activeThread] !== 'down') e.target.style.background = '#f0f0f0' }}
+                                    onMouseLeave={e => { if (userVotes[activeThread] !== 'down') e.target.style.background = 'transparent' }}>
+                                    <DownArrow active={userVotes[activeThread] === 'down'} />
                                 </button>
                             </div>
-                            <span className="inline-flex items-center gap-1.5 text-neutral-500 text-[13px] font-medium">
+                            <button style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f6f7f8', border: 'none', borderRadius: '24px', padding: '10px 16px', color: '#888', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: F, transition: 'background .15s' }}
+                                onMouseEnter={e => e.target.style.background = '#eee'}
+                                onMouseLeave={e => e.target.style.background = '#f6f7f8'}>
                                 <ChatIcon /> {threadDetail.replies?.length || 0} comments
-                            </span>
+                            </button>
                         </div>
                     </article>
 
-                    {/* Divider */}
-                    <div className="border-t border-neutral-100 mt-8 mb-8" />
-
-                    {/* Comments */}
-                    <section>
-                        <h2 className="text-[15px] font-semibold text-neutral-900 mb-6">
-                            Comments <span className="text-neutral-400 font-normal">({threadDetail.replies?.length || 0})</span>
+                    {/* Comments Section */}
+                    <div style={{ marginTop: '32px' }}>
+                        <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#111', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            💬 Comments <span style={{ color: '#bbb', fontWeight: 500 }}>({threadDetail.replies?.length || 0})</span>
                         </h2>
 
                         {(!threadDetail.replies || threadDetail.replies.length === 0) ? (
-                            <p className="text-neutral-400 text-center py-10 text-[14px]">No comments yet — be the first to reply.</p>
+                            <div style={{ textAlign: 'center', padding: '48px 0', color: '#ccc', fontSize: '14px', background: 'white', borderRadius: '16px', border: '1px solid #eee' }}>
+                                No comments yet — be the first to reply.
+                            </div>
                         ) : (
-                            <div className="space-y-0">
+                            <div>
                                 {threadDetail.replies.map((r, i) => (
-                                    <div key={r.REPLY_ID || i} className={`py-5 ${i > 0 ? 'border-t border-neutral-100' : ''}`}>
-                                        <div className="flex items-center gap-2.5 mb-2">
+                                    <div key={r.REPLY_ID || i} style={{
+                                        background: 'white', borderRadius: '16px', padding: '24px', marginBottom: '12px',
+                                        border: '1px solid #eee', boxShadow: '0 1px 4px rgba(0,0,0,.02)'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
                                             <Avatar name={r.AUTHOR} />
-                                            <span className="font-semibold text-neutral-900 text-[13px]">{r.AUTHOR}</span>
-                                            <span className="text-neutral-400 text-[12px]">{timeAgo(r.CREATED_DATE)}</span>
+                                            <span style={{ fontWeight: 700, color: '#111', fontSize: '13px' }}>{r.AUTHOR}</span>
+                                            <span style={{ color: '#bbb', fontSize: '12px' }}>{timeAgo(r.CREATED_DATE)}</span>
                                             {user?.name === r.AUTHOR && (
                                                 <button onClick={() => handleDeleteReply(r.REPLY_ID)}
-                                                    className="ml-auto text-neutral-400 hover:text-red-500 transition-colors"><TrashIcon /></button>
+                                                    style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#ccc', cursor: 'pointer', transition: 'color .2s' }}
+                                                    onMouseEnter={e => e.target.style.color = '#ef4444'}
+                                                    onMouseLeave={e => e.target.style.color = '#ccc'}>
+                                                    <TrashIcon />
+                                                </button>
                                             )}
                                         </div>
-                                        <p className="text-neutral-600 text-[14px] leading-[1.7] whitespace-pre-wrap pl-[38px]">{r.CONTENT}</p>
-                                        {r.IMAGE_URL && (
-                                            <img src={r.IMAGE_URL} alt=""
-                                                className="ml-[38px] mt-3 max-w-sm w-full rounded-lg border border-neutral-100 cursor-pointer"
-                                                onClick={() => window.open(r.IMAGE_URL, '_blank')} />
-                                        )}
+                                        <p style={{ color: '#444', fontSize: '14px', lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0 }}>{r.CONTENT}</p>
+                                        <RenderImages images={r.IMAGE_URL} />
                                     </div>
                                 ))}
                             </div>
                         )}
-                    </section>
+                    </div>
 
                     {/* Reply Form */}
-                    <div className="border-t border-neutral-100 mt-6 pt-6">
+                    <div style={{ background: 'white', borderRadius: '16px', padding: '24px', marginTop: '20px', border: '1px solid #eee' }}>
                         <form onSubmit={handleAddReply}>
                             <textarea value={replyContent} onChange={(e) => setReplyContent(e.target.value)}
-                                placeholder="Write a comment…"
-                                rows={3} required
-                                className="w-full px-4 py-3 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:border-neutral-300 transition-shadow bg-white" />
-
-                            <div className="flex items-center justify-between mt-3">
+                                placeholder="Write a comment…" rows={3} required
+                                style={{
+                                    width: '100%', padding: '14px 16px', border: '1.5px solid #e5e5e5', borderRadius: '14px',
+                                    fontSize: '14px', resize: 'none', fontFamily: F, color: '#111', background: '#fafafa',
+                                    outline: 'none', transition: 'border-color .2s, box-shadow .2s', boxSizing: 'border-box'
+                                }}
+                                onFocus={e => { e.target.style.borderColor = '#111'; e.target.style.boxShadow = '0 0 0 3px rgba(0,0,0,.06)' }}
+                                onBlur={e => { e.target.style.borderColor = '#e5e5e5'; e.target.style.boxShadow = 'none' }} />
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px' }}>
                                 <div>
-                                    <input type="file" ref={replyImageRef} accept="image/*" className="hidden"
+                                    <input type="file" ref={replyImageRef} accept="image/*" style={{ display: 'none' }}
                                         onChange={(e) => handleImageSelect(e, setReplyImages, setReplyImagePreviews, replyImages)} />
                                     <button type="button" onClick={() => replyImageRef.current?.click()}
-                                        className="inline-flex items-center gap-1.5 text-neutral-400 hover:text-neutral-700 text-[13px] font-medium transition-colors">
+                                        style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'none', border: 'none', color: '#999', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: F }}>
                                         <ImageIcon /> Attach image
                                     </button>
                                     <ImagePreviews previews={replyImagePreviews} onRemove={removeImage} setImages={setReplyImages} setPreviews={setReplyImagePreviews} />
                                 </div>
                                 <button type="submit" disabled={replying || !replyContent.trim()}
-                                    className="bg-neutral-900 hover:bg-black text-white text-[13px] font-semibold px-5 py-2 rounded-lg transition-colors disabled:opacity-25 disabled:cursor-not-allowed">
+                                    style={{
+                                        background: '#111', color: 'white', fontSize: '13px', fontWeight: 700, padding: '10px 24px',
+                                        borderRadius: '12px', border: 'none', cursor: 'pointer', fontFamily: F,
+                                        opacity: (replying || !replyContent.trim()) ? .3 : 1, transition: 'all .2s',
+                                        boxShadow: '0 4px 14px rgba(0,0,0,.15)'
+                                    }}>
                                     {replying ? 'Posting…' : 'Reply'}
                                 </button>
                             </div>
@@ -271,66 +335,92 @@ const Forum = () => {
 
     // ─── THREAD LIST ────────────────────────────────────────
     return (
-        <div className="min-h-screen bg-white" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div style={{ minHeight: '100vh', background: '#fafafa', fontFamily: F }}>
+            <div style={{ maxWidth: '820px', margin: '0 auto', padding: '40px 24px 80px' }}>
 
-            {/* Thin top accent */}
-            <div className="h-[3px] bg-neutral-900" />
-
-            <div className="max-w-[760px] mx-auto px-5 pt-10 pb-20">
-
-                {/* Header — clean inline */}
-                <div className="flex items-center justify-between mb-8 pb-8 border-b border-neutral-100">
-                    <div className="flex items-center gap-4">
-                        <div className="w-11 h-11 rounded-xl bg-neutral-900 flex items-center justify-center text-white">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {/* Header */}
+                <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    marginBottom: '32px', paddingBottom: '28px', borderBottom: '1px solid #eee'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <div style={{
+                            width: '52px', height: '52px', borderRadius: '16px', background: '#111',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white',
+                            boxShadow: '0 6px 20px rgba(0,0,0,.2)'
+                        }}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                             </svg>
                         </div>
                         <div>
-                            <h1 className="text-[22px] font-bold text-neutral-900 tracking-tight leading-none">Discussion Forum</h1>
-                            <p className="text-neutral-400 text-[13px] mt-1">{threads.length} discussion{threads.length !== 1 ? 's' : ''} · Ask questions & share ideas</p>
+                            <h1 style={{ fontSize: '26px', fontWeight: 800, color: '#111', margin: 0, letterSpacing: '-0.5px', lineHeight: 1.1 }}>Discussion Forum</h1>
+                            <p style={{ color: '#999', fontSize: '13px', margin: '4px 0 0', fontWeight: 500 }}>
+                                {threads.length} discussion{threads.length !== 1 ? 's' : ''} · Ask questions & share ideas
+                            </p>
                         </div>
                     </div>
                     <button onClick={() => setShowNewForm(!showNewForm)}
-                        className={`text-[13px] font-semibold px-4 py-2.5 rounded-lg transition-colors ${showNewForm
-                            ? 'bg-neutral-100 text-neutral-600 hover:bg-neutral-200'
-                            : 'bg-neutral-900 text-white hover:bg-black'
-                            }`}>
-                        {showNewForm ? 'Cancel' : '+ New Post'}
+                        style={{
+                            fontSize: '13px', fontWeight: 700, padding: '12px 28px', borderRadius: '14px', border: 'none', cursor: 'pointer', fontFamily: F,
+                            background: showNewForm ? '#f5f5f5' : 'linear-gradient(135deg, #1a1a2e, #16213e, #0f3460)',
+                            color: showNewForm ? '#666' : 'white', letterSpacing: '0.3px',
+                            boxShadow: showNewForm ? 'none' : '0 8px 28px rgba(15,52,96,.35), 0 2px 8px rgba(0,0,0,.15)',
+                            transition: 'all .3s cubic-bezier(.4,0,.2,1)', transform: 'scale(1)'
+                        }}
+                        onMouseEnter={e => { if (!showNewForm) { e.target.style.transform = 'scale(1.05)'; e.target.style.boxShadow = '0 12px 36px rgba(15,52,96,.45), 0 4px 12px rgba(0,0,0,.2)' }}}
+                        onMouseLeave={e => { e.target.style.transform = 'scale(1)'; if (!showNewForm) e.target.style.boxShadow = '0 8px 28px rgba(15,52,96,.35), 0 2px 8px rgba(0,0,0,.15)' }}>
+                        {showNewForm ? '✕ Cancel' : '+ New Post'}
                     </button>
                 </div>
 
                 {/* Create Form */}
                 {showNewForm && (
-                    <div className="border border-neutral-200 rounded-xl p-6 mb-8">
-                        <h3 className="text-[16px] font-semibold text-neutral-900 mb-5">Create a post</h3>
+                    <div style={{ background: 'white', border: '1px solid #eee', borderRadius: '20px', padding: '28px', marginBottom: '28px', boxShadow: '0 2px 12px rgba(0,0,0,.04)' }}>
+                        <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#111', margin: '0 0 20px' }}>Create a post</h3>
                         <form onSubmit={handleCreateThread}>
                             <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
                                 placeholder="Title" required
-                                className="w-full px-4 py-3 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 text-[14px] font-medium focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:border-neutral-300 mb-3 bg-white" />
+                                style={{
+                                    width: '100%', padding: '14px 16px', border: '1.5px solid #e5e5e5', borderRadius: '14px',
+                                    fontSize: '15px', fontWeight: 600, fontFamily: F, color: '#111', background: '#fafafa',
+                                    outline: 'none', marginBottom: '12px', boxSizing: 'border-box', transition: 'border-color .2s'
+                                }}
+                                onFocus={e => e.target.style.borderColor = '#111'}
+                                onBlur={e => e.target.style.borderColor = '#e5e5e5'} />
                             <textarea value={newContent} onChange={(e) => setNewContent(e.target.value)}
                                 placeholder="Share your thoughts…" rows={5} required
-                                className="w-full px-4 py-3 border border-neutral-200 rounded-xl text-neutral-900 placeholder-neutral-400 text-[14px] resize-none focus:outline-none focus:ring-2 focus:ring-neutral-200 focus:border-neutral-300 mb-3 bg-white" />
+                                style={{
+                                    width: '100%', padding: '14px 16px', border: '1.5px solid #e5e5e5', borderRadius: '14px',
+                                    fontSize: '14px', resize: 'none', fontFamily: F, color: '#111', background: '#fafafa',
+                                    outline: 'none', marginBottom: '12px', boxSizing: 'border-box', transition: 'border-color .2s'
+                                }}
+                                onFocus={e => e.target.style.borderColor = '#111'}
+                                onBlur={e => e.target.style.borderColor = '#e5e5e5'} />
 
-                            <div className="mb-5">
-                                <input type="file" ref={threadImageRef} accept="image/*" multiple className="hidden"
+                            <div style={{ marginBottom: '20px' }}>
+                                <input type="file" ref={threadImageRef} accept="image/*" multiple style={{ display: 'none' }}
                                     onChange={(e) => handleImageSelect(e, setNewImages, setNewImagePreviews, newImages)} />
                                 <button type="button" onClick={() => threadImageRef.current?.click()}
                                     disabled={newImages.length >= 5}
-                                    className="inline-flex items-center gap-1.5 text-neutral-400 hover:text-neutral-700 text-[13px] font-medium transition-colors disabled:opacity-30">
+                                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'none', border: '1px solid #e5e5e5', borderRadius: '10px', color: '#888', fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: '8px 16px', fontFamily: F, opacity: newImages.length >= 5 ? .4 : 1 }}>
                                     <ImageIcon /> Attach images ({newImages.length}/5)
                                 </button>
                                 <ImagePreviews previews={newImagePreviews} onRemove={removeImage} setImages={setNewImages} setPreviews={setNewImagePreviews} />
                             </div>
 
-                            <div className="flex justify-end gap-2">
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                                 <button type="button"
                                     onClick={() => { setShowNewForm(false); setNewTitle(''); setNewContent(''); setNewImages([]); setNewImagePreviews([]) }}
-                                    className="text-neutral-500 hover:text-neutral-700 text-[13px] font-semibold px-4 py-2 rounded-lg hover:bg-neutral-50 transition-colors">
+                                    style={{ padding: '10px 20px', background: 'none', border: '1px solid #e5e5e5', borderRadius: '12px', color: '#888', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: F }}>
                                     Cancel
                                 </button>
                                 <button type="submit" disabled={creating}
-                                    className="bg-neutral-900 hover:bg-black text-white text-[13px] font-semibold px-5 py-2 rounded-lg transition-colors disabled:opacity-25">
+                                    style={{
+                                        padding: '10px 28px', background: '#111', color: 'white', border: 'none', borderRadius: '12px',
+                                        fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: F,
+                                        opacity: creating ? .3 : 1, boxShadow: '0 4px 14px rgba(0,0,0,.15)'
+                                    }}>
                                     {creating ? 'Posting…' : 'Publish'}
                                 </button>
                             </div>
@@ -340,68 +430,94 @@ const Forum = () => {
 
                 {/* List */}
                 {isLoading ? (
-                    <div className="text-center py-20">
-                        <div className="animate-spin w-5 h-5 border-2 border-neutral-300 border-t-neutral-900 rounded-full mx-auto" />
+                    <div style={{ textAlign: 'center', padding: '80px 0' }}>
+                        <div style={{ width: '32px', height: '32px', border: '3px solid #e5e5e5', borderTop: '3px solid #111', borderRadius: '50%', margin: '0 auto', animation: 'spin 1s linear infinite' }} />
+                        <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
                     </div>
                 ) : threads.length === 0 ? (
-                    <div className="text-center py-20 border border-neutral-200 rounded-xl">
-                        <p className="text-neutral-400 text-[15px]">No discussions yet.</p>
-                        <p className="text-neutral-400 text-[13px] mt-1">Be the first to start one!</p>
+                    <div style={{ textAlign: 'center', padding: '60px 0', background: 'white', borderRadius: '20px', border: '1px solid #eee' }}>
+                        <p style={{ fontSize: '40px', margin: '0 0 8px', opacity: .3 }}>💬</p>
+                        <p style={{ color: '#bbb', fontSize: '15px', fontWeight: 600, margin: '0 0 4px' }}>No discussions yet.</p>
+                        <p style={{ color: '#ccc', fontSize: '13px', margin: 0 }}>Be the first to start one!</p>
                     </div>
                 ) : (
-                    <div className="divide-y divide-neutral-100">
+                    <div>
                         {threads.map((t) => {
                             const score = (t.UPVOTES || 0) - (t.DOWNVOTES || 0)
+                            const imgs = parseImages(t.IMAGE_URL)
                             return (
                                 <div key={t.THREAD_ID}
-                                    className="py-6 cursor-pointer group"
-                                    onClick={() => setActiveThread(t.THREAD_ID)}>
+                                    onClick={() => setActiveThread(t.THREAD_ID)}
+                                    style={{
+                                        background: 'white', borderRadius: '20px', padding: '28px', marginBottom: '14px',
+                                        border: '1px solid #eee', cursor: 'pointer', transition: 'all .25s',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,.03)'
+                                    }}
+                                    onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 12px 36px rgba(0,0,0,.08)'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                                    onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.03)'; e.currentTarget.style.transform = 'translateY(0)' }}>
 
-                                    {/* Author & time */}
-                                    <div className="flex items-center gap-2.5 mb-2.5">
+                                    {/* Author */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
                                         <Avatar name={t.AUTHOR} />
-                                        <span className="font-medium text-neutral-600 text-[13px]">{t.AUTHOR}</span>
-                                        <span className="text-neutral-400 text-[12px]">{timeAgo(t.CREATED_DATE)}</span>
+                                        <span style={{ fontWeight: 600, color: '#444', fontSize: '13px' }}>{t.AUTHOR}</span>
+                                        <span style={{ color: '#bbb', fontSize: '12px' }}>· {timeAgo(t.CREATED_DATE)}</span>
                                     </div>
 
                                     {/* Title */}
-                                    <h3 className="text-[17px] font-semibold text-neutral-900 leading-snug mb-1.5 group-hover:text-neutral-600 transition-colors">
+                                    <h3 style={{ fontSize: '19px', fontWeight: 700, color: '#111', lineHeight: 1.35, margin: '0 0 8px', letterSpacing: '-0.3px' }}>
                                         {t.TITLE}
                                     </h3>
 
                                     {/* Preview */}
-                                    <p className="text-neutral-500 text-[14px] leading-relaxed line-clamp-2 mb-3">{t.CONTENT}</p>
+                                    <p style={{ color: '#777', fontSize: '14px', lineHeight: 1.6, margin: '0 0 14px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                        {t.CONTENT}
+                                    </p>
 
-                                    {/* Image */}
-                                    {t.IMAGE_URL && (
-                                        <img src={t.IMAGE_URL} alt=""
-                                            className="w-full max-h-[200px] object-contain bg-neutral-50 rounded-xl border border-neutral-100 mb-3" />
+                                    {/* Images (bigger) */}
+                                    {imgs.length > 0 && (
+                                        <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                                            {imgs.map((img, idx) => (
+                                                <img key={idx} src={img} alt=""
+                                                    style={{
+                                                        width: '100%', maxHeight: '320px', objectFit: 'cover',
+                                                        borderRadius: '14px', border: '1px solid #eee', background: '#fafafa'
+                                                    }} />
+                                            ))}
+                                        </div>
                                     )}
 
-                                    {/* Bottom bar */}
-                                    <div className="flex items-center gap-3 text-neutral-400" onClick={(e) => e.stopPropagation()}>
-                                        {/* Votes */}
-                                        <div className="inline-flex items-center border border-neutral-200 rounded-full divide-x divide-neutral-200">
+                                    {/* Bottom Bar — Reddit Style */}
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+                                        {/* Votes Pill */}
+                                        <div style={{ display: 'inline-flex', alignItems: 'center', background: '#f6f7f8', borderRadius: '24px', overflow: 'hidden' }}>
                                             <button onClick={() => handleVote(t.THREAD_ID, 'up')}
-                                                className={`px-2 py-1 rounded-l-full transition-colors hover:bg-neutral-50 ${userVotes[t.THREAD_ID] === 'up' ? 'bg-neutral-100' : ''}`}>
-                                                <ChevronUp active={userVotes[t.THREAD_ID] === 'up'} />
+                                                style={{ padding: '8px 10px', background: userVotes[t.THREAD_ID] === 'up' ? '#ffe9e0' : 'transparent', border: 'none', cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', borderRadius: '24px 0 0 24px' }}
+                                                onMouseEnter={e => { if (userVotes[t.THREAD_ID] !== 'up') e.target.style.background = '#eee' }}
+                                                onMouseLeave={e => { if (userVotes[t.THREAD_ID] !== 'up') e.target.style.background = 'transparent' }}>
+                                                <UpArrow active={userVotes[t.THREAD_ID] === 'up'} />
                                             </button>
-                                            <span className="px-2.5 text-[12px] font-semibold text-neutral-900 tabular-nums">{score}</span>
+                                            <span style={{ padding: '0 4px', fontSize: '13px', fontWeight: 800, color: userVotes[t.THREAD_ID] === 'up' ? '#ff4500' : userVotes[t.THREAD_ID] === 'down' ? '#7193ff' : '#1a1a1b', fontFamily: F, minWidth: '24px', textAlign: 'center' }}>{score}</span>
                                             <button onClick={() => handleVote(t.THREAD_ID, 'down')}
-                                                className={`px-2 py-1 rounded-r-full transition-colors hover:bg-neutral-50 ${userVotes[t.THREAD_ID] === 'down' ? 'bg-neutral-100' : ''}`}>
-                                                <ChevronDown active={userVotes[t.THREAD_ID] === 'down'} />
+                                                style={{ padding: '8px 10px', background: userVotes[t.THREAD_ID] === 'down' ? '#dde5ff' : 'transparent', border: 'none', cursor: 'pointer', transition: 'all .15s', display: 'flex', alignItems: 'center', borderRadius: '0 24px 24px 0' }}
+                                                onMouseEnter={e => { if (userVotes[t.THREAD_ID] !== 'down') e.target.style.background = '#eee' }}
+                                                onMouseLeave={e => { if (userVotes[t.THREAD_ID] !== 'down') e.target.style.background = 'transparent' }}>
+                                                <DownArrow active={userVotes[t.THREAD_ID] === 'down'} />
                                             </button>
                                         </div>
 
-                                        {/* Comments */}
+                                        {/* Comments Pill */}
                                         <button onClick={() => setActiveThread(t.THREAD_ID)}
-                                            className="inline-flex items-center gap-1.5 text-[12px] font-medium hover:text-neutral-700 transition-colors">
-                                            <ChatIcon /> {t.REPLY_COUNT || 0}
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f6f7f8', border: 'none', borderRadius: '24px', padding: '8px 14px', color: '#878a8c', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: F, transition: 'background .15s' }}
+                                            onMouseEnter={e => e.target.style.background = '#eee'}
+                                            onMouseLeave={e => e.target.style.background = '#f6f7f8'}>
+                                            <ChatIcon /> {t.REPLY_COUNT || 0} Comments
                                         </button>
 
-                                        {/* Share */}
+                                        {/* Share Pill */}
                                         <button onClick={() => { navigator.clipboard.writeText(window.location.origin + '/forum?thread=' + t.THREAD_ID); alert('Link copied!') }}
-                                            className="inline-flex items-center gap-1.5 text-[12px] font-medium hover:text-neutral-700 transition-colors">
+                                            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#f6f7f8', border: 'none', borderRadius: '24px', padding: '8px 14px', color: '#878a8c', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: F, transition: 'background .15s' }}
+                                            onMouseEnter={e => e.target.style.background = '#eee'}
+                                            onMouseLeave={e => e.target.style.background = '#f6f7f8'}>
                                             <LinkIcon /> Share
                                         </button>
                                     </div>

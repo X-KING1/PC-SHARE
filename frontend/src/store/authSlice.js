@@ -2,8 +2,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { STATUS } from '../globals/Status';
+import config from '../config';
 
-const API_URL = 'http://localhost:5000/api/users';
+const API_URL = `${config.API_BASE}/api/users`;
 
 // Get stored auth from localStorage
 const getStoredAuth = () => {
@@ -108,6 +109,43 @@ export const resetPassword = createAsyncThunk(
             return response.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || 'Password reset failed');
+        }
+    }
+);
+
+// Update Profile
+export const updateUserProfile = createAsyncThunk(
+    'auth/updateProfile',
+    async (profileData, { rejectWithValue, getState }) => {
+        try {
+            const token = getState().auth.token || localStorage.getItem('token');
+            const response = await axios.put(`${API_URL}/me`, profileData, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            localStorage.setItem('user', JSON.stringify(response.data.data));
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Profile update failed');
+        }
+    }
+);
+
+// Upload Avatar
+export const uploadUserAvatar = createAsyncThunk(
+    'auth/uploadAvatar',
+    async (formData, { rejectWithValue, getState }) => {
+        try {
+            const token = getState().auth.token || localStorage.getItem('token');
+            const response = await axios.post(`${API_URL}/me/avatar`, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+            localStorage.setItem('user', JSON.stringify(response.data.data));
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(error.response?.data?.message || 'Avatar upload failed');
         }
     }
 );
@@ -219,6 +257,18 @@ const authSlice = createSlice({
             .addCase(resetPassword.rejected, (state, action) => {
                 state.status = STATUS.ERROR;
                 state.error = action.payload;
+            });
+
+        // Update Profile
+        builder
+            .addCase(updateUserProfile.fulfilled, (state, action) => {
+                state.user = action.payload.data;
+            });
+
+        // Upload Avatar
+        builder
+            .addCase(uploadUserAvatar.fulfilled, (state, action) => {
+                state.user = action.payload.data;
             });
     }
 });

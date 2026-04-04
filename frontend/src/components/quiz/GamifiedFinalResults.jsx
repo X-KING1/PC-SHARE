@@ -3,10 +3,19 @@ import { useEffect } from 'react';
 import { triggerConfetti } from '../../animations/confetti';
 import { useNavigate } from 'react-router-dom';
 
-const GamifiedFinalResults = ({ score, totalQuestions, quizTitle, passingScore, earnedBadges, onRestart }) => {
+const GamifiedFinalResults = ({ score, totalQuestions, quizTitle, quizId, passingScore, earnedBadges, onRestart, courseTitle, instructorName }) => {
     const navigate = useNavigate();
     const badgeCount = earnedBadges?.length || 0;
     const passed = badgeCount >= 3;
+    const percentage = totalQuestions > 0 ? Math.round((score / (totalQuestions * 10)) * 100) : 0;
+
+    // Detect quiz difficulty from title
+    const titleLower = (quizTitle || '').toLowerCase();
+    const isEasy = titleLower.includes('easy');
+    const isMedium = titleLower.includes('medium');
+    const isHard = titleLower.includes('hard');
+    // Next quiz ID: Easy→Medium (+1), Medium→Hard (+1)
+    const nextQuizId = quizId ? quizId + 1 : null;
 
     useEffect(() => {
         if (passed) triggerConfetti();
@@ -22,23 +31,33 @@ const GamifiedFinalResults = ({ score, totalQuestions, quizTitle, passingScore, 
     const { label, color, bg } = getRank();
 
     return (
-        <div className="my-learning-page">
-            <section className="ml-section" style={{ paddingTop: '40px', paddingBottom: '60px' }}>
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6, type: 'spring' }}
-                    style={{ maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}
-                >
+        <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: 'rgba(0,0,0,0.55)', backdropFilter: 'blur(6px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '20px',
+        }}>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.5, type: 'spring', bounce: 0.3 }}
+                style={{
+                    background: 'white', borderRadius: '20px',
+                    boxShadow: '0 30px 80px rgba(0,0,0,0.3)',
+                    width: '100%', maxWidth: '520px', maxHeight: '85vh',
+                    overflowY: 'auto', padding: '36px 32px',
+                    textAlign: 'center', position: 'relative',
+                }}
+            >
                     {/* Medal with CSS */}
                     <motion.div
                         initial={{ scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ delay: 0.3, type: 'spring', duration: 0.8, bounce: 0.5 }}
-                        style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}
+                        style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}
                     >
                         <div style={{
-                            width: '140px', height: '140px', borderRadius: '50%', background: bg,
+                            width: '100px', height: '100px', borderRadius: '50%', background: bg,
                             boxShadow: `0 20px 50px ${color}55, inset 0 -8px 20px rgba(0,0,0,0.2), inset 0 8px 20px rgba(255,255,255,0.35)`,
                             display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative'
                         }}>
@@ -157,9 +176,10 @@ const GamifiedFinalResults = ({ score, totalQuestions, quizTitle, passingScore, 
                         transition={{ delay: 1.2 }}
                         style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}
                     >
-                        {passed && earnedBadges && earnedBadges.length >= 3 && (
+                        {/* Certificate: ONLY after Hard quiz with all levels passed */}
+                        {isHard && passed && earnedBadges && earnedBadges.length >= 3 && (
                             <button
-                                onClick={() => navigate('/certificate', { state: { score, percentage } })}
+                                onClick={() => navigate('/certificate', { state: { score, percentage, quizTitle, courseTitle, instructorName, allLevelsPassed: true } })}
                                 style={{
                                     padding: '14px 28px', fontSize: '15px',
                                     background: 'linear-gradient(135deg, #5624d0, #7c3aed)',
@@ -170,6 +190,48 @@ const GamifiedFinalResults = ({ score, totalQuestions, quizTitle, passingScore, 
                             >
                                 🏆 Get Certificate
                             </button>
+                        )}
+                        {/* Easy → Move to Medium */}
+                        {isEasy && passed && nextQuizId && (
+                            <button
+                                onClick={() => navigate(`/quiz/${nextQuizId}`)}
+                                style={{
+                                    padding: '14px 28px', fontSize: '15px',
+                                    background: 'linear-gradient(135deg, #059669, #10b981)',
+                                    color: 'white', border: 'none', borderRadius: '12px',
+                                    fontWeight: '700', cursor: 'pointer',
+                                    boxShadow: '0 8px 24px rgba(5,150,105,0.35)'
+                                }}
+                            >
+                                🚀 Move to Medium Quiz
+                            </button>
+                        )}
+                        {/* Medium → Move to Hard */}
+                        {isMedium && passed && nextQuizId && (
+                            <button
+                                onClick={() => navigate(`/quiz/${nextQuizId}`)}
+                                style={{
+                                    padding: '14px 28px', fontSize: '15px',
+                                    background: 'linear-gradient(135deg, #d97706, #f59e0b)',
+                                    color: 'white', border: 'none', borderRadius: '12px',
+                                    fontWeight: '700', cursor: 'pointer',
+                                    boxShadow: '0 8px 24px rgba(217,119,6,0.35)'
+                                }}
+                            >
+                                🔥 Move to Hard Quiz
+                            </button>
+                        )}
+                        {/* Progress message when not all levels passed */}
+                        {!passed && (
+                            <div style={{
+                                padding: '12px 24px', borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #fef3c7, #fef9c3)',
+                                border: '1px solid #fde68a',
+                                display: 'flex', alignItems: 'center', gap: '8px',
+                                fontSize: '13px', color: '#92400e', fontWeight: 600,
+                            }}>
+                                {isHard ? '🔒 Pass all 3 levels to unlock your certificate' : `⭐ Pass all levels to move to the ${isEasy ? 'Medium' : 'Hard'} Quiz`}
+                            </div>
                         )}
                         <button
                             onClick={onRestart}
@@ -195,8 +257,7 @@ const GamifiedFinalResults = ({ score, totalQuestions, quizTitle, passingScore, 
                             ← Back to Course
                         </button>
                     </motion.div>
-                </motion.div>
-            </section>
+            </motion.div>
         </div>
     );
 };

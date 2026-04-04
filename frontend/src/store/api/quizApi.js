@@ -22,6 +22,13 @@ export const quizApi = baseApi.injectEndpoints({
             // Invalidate quiz cache after submission
             invalidatesTags: (result, error, { course_id }) => [{ type: 'Quiz', id: course_id }],
         }),
+
+        // GET /api/quizzes/completed/:userId - Get completed quiz IDs
+        getCompletedQuizzes: build.query({
+            query: (userId) => `/quizzes/completed/${userId}`,
+            transformResponse: (response) => response.data,
+            providesTags: ['CompletedQuizzes'],
+        }),
     }),
     overrideExisting: false,
 });
@@ -30,4 +37,5 @@ export const quizApi = baseApi.injectEndpoints({
 export const {
     useGetQuizzesQuery,
     useSubmitQuizMutation,
+    useGetCompletedQuizzesQuery,
 } = quizApi;

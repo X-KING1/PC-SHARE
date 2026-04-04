@@ -12,6 +12,7 @@ const PaymentSuccess = () => {
     const pidx = searchParams.get('pidx')
     const provider = searchParams.get('provider') || (sessionId ? 'stripe' : 'khalti')
     const order = searchParams.get('order')
+    const courseId = searchParams.get('course_id')
 
     const { data: stripeStatus } = useGetStripeStatusQuery(sessionId, {
         skip: !sessionId
@@ -155,14 +156,14 @@ const PaymentSuccess = () => {
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-2.5">
                     <Link
-                        to="/purchased-courses"
+                        to={courseId ? `/course/${courseId}` : '/purchased-courses'}
                         className="w-full py-3.5 bg-neutral-900 hover:bg-black text-white font-bold text-[14px] rounded-xl transition-all no-underline flex items-center justify-center gap-2 group"
                         style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.12)' }}
                     >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M4 19.5A2.5 2.5 0 016.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
                         </svg>
-                        My Purchased Courses
+                        {courseId ? 'Go to Course' : 'My Purchased Courses'}
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
                             className="group-hover:translate-x-0.5 transition-transform">
                             <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />

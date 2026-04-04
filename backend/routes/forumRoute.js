@@ -3,7 +3,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { getThreads, getThread, createThread, addReply, upvoteThread, downvoteThread } from '../controllers/forumController.js';
+import { getThreads, getThread, createThread, addReply, voteThread, getUserVotes } from '../controllers/forumController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -56,9 +56,9 @@ router.post('/threads/:id/reply', upload.array('images', 5), (req, res, next) =>
     next();
 }, addReply);
 
-// Voting routes
-router.post('/threads/:id/upvote', upvoteThread);
-router.post('/threads/:id/downvote', downvoteThread);
+// Voting routes (unified - one vote per user)
+router.post('/threads/:id/vote', voteThread);
+router.get('/votes/:userId', getUserVotes);
 
 // Delete thread
 router.delete('/threads/:id', async (req, res) => {

@@ -20,6 +20,7 @@ import PaymentFailure from './pages/PaymentFailure'
 import PurchasedCourses from './pages/PurchasedCourses'
 import MentorDashboard from './pages/MentorDashboard'
 import Forum from './pages/Forum'
+import UserProfile from './pages/UserProfile'
 import useAuth from './hooks/useAuth'
 
 // Redirects admin users to /admin from any non-admin page
@@ -29,6 +30,18 @@ const AdminRedirect = ({ children }) => {
 
     if (isAuthenticated && user?.role === 'admin' && !location.pathname.startsWith('/admin') && location.pathname !== '/auth-callback') {
         return <Navigate to="/admin" replace />
+    }
+    return children
+}
+
+// Redirects mentor users to /mentor from student-facing pages
+const MentorRedirect = ({ children }) => {
+    const { user, isAuthenticated } = useAuth()
+    const location = useLocation()
+    const allowed = ['/mentor', '/profile', '/forum', '/auth-callback']
+
+    if (isAuthenticated && user?.role === 'mentor' && !allowed.includes(location.pathname)) {
+        return <Navigate to="/mentor" replace />
     }
     return children
 }
@@ -54,35 +67,39 @@ function App() {
                         <Route path="/auth-callback" element={<AuthCallback />} />
 
                         {/* All other routes — redirect admin users away */}
-                        <Route path="/" element={<AdminRedirect><Home /></AdminRedirect>} />
-                        <Route path="/courses" element={<AdminRedirect><Courses /></AdminRedirect>} />
-                        <Route path="/course/:id" element={<AdminRedirect><CourseDetail /></AdminRedirect>} />
+                        <Route path="/" element={<AdminRedirect><MentorRedirect><Home /></MentorRedirect></AdminRedirect>} />
+                        <Route path="/courses" element={<AdminRedirect><MentorRedirect><Courses /></MentorRedirect></AdminRedirect>} />
+                        <Route path="/course/:id" element={<AdminRedirect><MentorRedirect><CourseDetail /></MentorRedirect></AdminRedirect>} />
                         <Route path="/login" element={<Navigate to="/" replace />} />
                         <Route path="/register" element={<Navigate to="/" replace />} />
-                        <Route path="/payment-success" element={<AdminRedirect><PaymentSuccess /></AdminRedirect>} />
-                        <Route path="/payment-failure" element={<AdminRedirect><PaymentFailure /></AdminRedirect>} />
+                        <Route path="/payment-success" element={<AdminRedirect><MentorRedirect><PaymentSuccess /></MentorRedirect></AdminRedirect>} />
+                        <Route path="/payment-failure" element={<AdminRedirect><MentorRedirect><PaymentFailure /></MentorRedirect></AdminRedirect>} />
 
                         {/* Protected Routes */}
                         <Route path="/my-learning" element={
-                            <ProtectedRoute><AdminRedirect><MyLearning /></AdminRedirect></ProtectedRoute>
+                            <ProtectedRoute><AdminRedirect><MentorRedirect><MyLearning /></MentorRedirect></AdminRedirect></ProtectedRoute>
                         } />
                         <Route path="/purchased-courses" element={
-                            <ProtectedRoute><AdminRedirect><PurchasedCourses /></AdminRedirect></ProtectedRoute>
+                            <ProtectedRoute><AdminRedirect><MentorRedirect><PurchasedCourses /></MentorRedirect></AdminRedirect></ProtectedRoute>
                         } />
                         <Route path="/quiz/:id" element={
-                            <ProtectedRoute><AdminRedirect><Quiz /></AdminRedirect></ProtectedRoute>
+                            <ProtectedRoute><AdminRedirect><MentorRedirect><Quiz /></MentorRedirect></AdminRedirect></ProtectedRoute>
                         } />
                         <Route path="/certificate" element={
-                            <ProtectedRoute><AdminRedirect><Certificate /></AdminRedirect></ProtectedRoute>
+                            <ProtectedRoute><AdminRedirect><MentorRedirect><Certificate /></MentorRedirect></AdminRedirect></ProtectedRoute>
                         } />
                         <Route path="/dashboard" element={
-                            <ProtectedRoute><AdminRedirect><Dashboard /></AdminRedirect></ProtectedRoute>
+                            <ProtectedRoute><AdminRedirect><MentorRedirect><Dashboard /></MentorRedirect></AdminRedirect></ProtectedRoute>
                         } />
                         <Route path="/forum" element={
                             <ProtectedRoute><AdminRedirect><Forum /></AdminRedirect></ProtectedRoute>
                         } />
+
+                        <Route path="/profile" element={
+                            <ProtectedRoute><AdminRedirect><UserProfile /></AdminRedirect></ProtectedRoute>
+                        } />
                         <Route path="/mentor" element={
-                            <MentorRoute><AdminRedirect><MentorDashboard /></AdminRedirect></MentorRoute>
+                            <MentorRoute><MentorDashboard /></MentorRoute>
                         } />
                     </Routes>
                 </main>

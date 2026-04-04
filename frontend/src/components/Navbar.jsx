@@ -7,6 +7,7 @@ import { ROUTES } from '../constants'
 import { useGetCategoriesQuery } from '../store/api/courseApi'
 import LoginModal from './LoginModal'
 import RegisterModal from './RegisterModal'
+import config from '../config'
 
 const Navbar = () => {
     const [searchQuery, setSearchQuery] = useState('')
@@ -118,9 +119,7 @@ const Navbar = () => {
                         {isAuthenticated ? (
                             <>
                                 {isMentor ? (
-                                    <Link to="/mentor" className="nav-link" style={{ fontWeight: '700' }}>
-                                        👨‍🏫 Mentor Dashboard
-                                    </Link>
+                                    <></>
                                 ) : isAdmin ? (
                                     <Link to="/admin" className="nav-link" style={{ fontWeight: '700' }}>
                                         ⚡ Admin
@@ -135,9 +134,13 @@ const Navbar = () => {
                                         </Link>
                                     </>
                                 )}
-                                <Link to={ROUTES.DASHBOARD} className="user-btn">
+                                <Link to={ROUTES.PROFILE} className="user-btn">
                                     <div className="user-avatar-sm">
-                                        {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+                                        {user?.profile_image ? (
+                                            <img src={`${config.API_BASE}${user.profile_image}`} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                                        ) : (
+                                            user?.name?.charAt(0)?.toUpperCase() || 'U'
+                                        )}
                                     </div>
                                 </Link>
                                 <button onClick={logout} className="btn-logout-sm">

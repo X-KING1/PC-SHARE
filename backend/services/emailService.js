@@ -74,7 +74,7 @@ export const sendWelcomeEmail = async (toEmail, name) => {
                 <p>Start exploring our courses and enhance your skills today!</p>
                 
                 <div style="text-align: center; margin: 20px 0;">
-                    <a href="http://localhost:5173/courses" style="background: #9333ea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">Browse Courses</a>
+                    <a href="${process.env.FRONTEND_URL || 'http://localhost:5173'}/courses" style="background: #9333ea; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px;">Browse Courses</a>
                 </div>
                 
                 <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;">

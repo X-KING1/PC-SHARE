@@ -143,6 +143,28 @@ export const LiveSession = {
         }
     },
 
+    // Update session details (only if not completed)
+    update: async (sessionId, data) => {
+        const connection = await getConnection();
+        try {
+            const fields = [];
+            const params = { sessionId };
+            if (data.title) { fields.push('title = :title'); params.title = data.title; }
+            if (data.session_date) { fields.push('session_date = :session_date'); params.session_date = data.session_date; }
+            if (data.start_time) { fields.push('start_time = :start_time'); params.start_time = data.start_time; }
+            if (data.duration_minutes) { fields.push('duration_minutes = :duration'); params.duration = data.duration_minutes; }
+            if (data.course_id) { fields.push('course_id = :course_id'); params.course_id = data.course_id; }
+            if (fields.length === 0) return;
+            await connection.execute(
+                `UPDATE live_sessions SET ${fields.join(', ')} WHERE session_id = :sessionId AND status != 'completed'`,
+                params,
+                { autoCommit: true }
+            );
+        } finally {
+            await connection.close();
+        }
+    },
+
     // Delete a session
     remove: async (sessionId) => {
         const connection = await getConnection();

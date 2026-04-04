@@ -18,18 +18,34 @@ export const User = {
         finally { await connection.close(); }
     },
 
+    // Ensure profile_image column exists
+    ensureProfileImageColumn: async () => {
+        const connection = await getConnection();
+        try {
+            const check = await connection.execute(
+                `SELECT COUNT(*) FROM user_tab_columns WHERE table_name = 'USER_PROFILES' AND column_name = 'PROFILE_IMAGE'`
+            );
+            if (check.rows[0][0] === 0) {
+                await connection.execute(`ALTER TABLE user_profiles ADD (profile_image VARCHAR2(500))`);
+                await connection.execute('COMMIT');
+                console.log('✅ Added PROFILE_IMAGE column to USER_PROFILES');
+            }
+        } catch (e) { /* column may already exist */ }
+        finally { await connection.close(); }
+    },
+
     // Find user by email
     findByEmail: async (email) => {
         const connection = await getConnection();
         try {
             const result = await connection.execute(
-                'SELECT user_id, username, email, password_hash, skill_level, otp_code, otp_expires, role FROM user_profiles WHERE email = :email',
+                'SELECT user_id, username, email, password_hash, skill_level, otp_code, otp_expires, role, profile_image FROM user_profiles WHERE email = :email',
                 { email: email.toLowerCase() }
             );
 
             if (result.rows.length < 1) return null;
 
-            const columns = ['user_id', 'username', 'email', 'password_hash', 'skill_level', 'otp_code', 'otp_expires', 'role'];
+            const columns = ['user_id', 'username', 'email', 'password_hash', 'skill_level', 'otp_code', 'otp_expires', 'role', 'profile_image'];
             const user = {};
             columns.forEach((col, i) => user[col] = result.rows[0][i]);
             return user;
@@ -43,13 +59,13 @@ export const User = {
         const connection = await getConnection();
         try {
             const result = await connection.execute(
-                'SELECT user_id, username, email, skill_level, role FROM user_profiles WHERE user_id = :id',
+                'SELECT user_id, username, email, skill_level, role, profile_image FROM user_profiles WHERE user_id = :id',
                 { id }
             );
 
             if (result.rows.length < 1) return null;
 
-            const columns = ['user_id', 'username', 'email', 'skill_level', 'role'];
+            const columns = ['user_id', 'username', 'email', 'skill_level', 'role', 'profile_image'];
             const user = {};
             columns.forEach((col, i) => user[col] = result.rows[0][i]);
             return user;
@@ -192,6 +208,39 @@ export const User = {
             await connection.execute(
                 'DELETE FROM user_profiles WHERE user_id = :user_id',
                 { user_id: userId },
+                { autoCommit: true }
+            );
+        } finally {
+            await connection.close();
+        }
+    },
+
+    // Update user profile (name, skill_level)
+    updateProfile: async (userId, data) => {
+        const connection = await getConnection();
+        try {
+            const fields = [];
+            const params = { user_id: userId };
+            if (data.name) { fields.push('username = :username'); params.username = data.name; }
+            if (data.skill_level) { fields.push('skill_level = :skill_level'); params.skill_level = data.skill_level; }
+            if (fields.length === 0) return;
+            await connection.execute(
+                `UPDATE user_profiles SET ${fields.join(', ')} WHERE user_id = :user_id`,
+                params,
+                { autoCommit: true }
+            );
+        } finally {
+            await connection.close();
+        }
+    },
+
+    // Update profile image path
+    updateProfileImage: async (userId, imagePath) => {
+        const connection = await getConnection();
+        try {
+            await connection.execute(
+                'UPDATE user_profiles SET profile_image = :img WHERE user_id = :user_id',
+                { img: imagePath, user_id: userId },
                 { autoCommit: true }
             );
         } finally {

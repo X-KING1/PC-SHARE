@@ -12,6 +12,7 @@ export const ROUTES = {
     REGISTER: '/register',
     FORGOT_PASSWORD: '/forgot-password',
     DASHBOARD: '/dashboard',
+    PROFILE: '/profile',
     AUTH_CALLBACK: '/auth-callback',
 }
 

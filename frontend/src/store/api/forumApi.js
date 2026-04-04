@@ -17,6 +17,13 @@ export const forumApi = baseApi.injectEndpoints({
             providesTags: (result, error, id) => [{ type: 'Forum', id }],
         }),
 
+        // Get user's existing votes
+        getUserVotes: build.query({
+            query: (userId) => `/forum/votes/${userId}`,
+            transformResponse: (response) => response.data,
+            providesTags: ['ForumVotes'],
+        }),
+
         // Create new thread (with optional multiple images)
         createThread: build.mutation({
             query: (data) => {
@@ -56,22 +63,14 @@ export const forumApi = baseApi.injectEndpoints({
             invalidatesTags: (result, error, { threadId }) => [{ type: 'Forum', id: threadId }, 'Forum'],
         }),
 
-        // Upvote thread
-        upvoteThread: build.mutation({
-            query: (threadId) => ({
-                url: `/forum/threads/${threadId}/upvote`,
+        // Vote on thread (unified - one per user)
+        voteThread: build.mutation({
+            query: ({ threadId, user_id, vote_type }) => ({
+                url: `/forum/threads/${threadId}/vote`,
                 method: 'POST',
+                body: { user_id, vote_type },
             }),
-            invalidatesTags: ['Forum'],
-        }),
-
-        // Downvote thread
-        downvoteThread: build.mutation({
-            query: (threadId) => ({
-                url: `/forum/threads/${threadId}/downvote`,
-                method: 'POST',
-            }),
-            invalidatesTags: ['Forum'],
+            invalidatesTags: ['Forum', 'ForumVotes'],
         }),
 
         // Delete thread
@@ -97,10 +96,10 @@ export const forumApi = baseApi.injectEndpoints({
 export const {
     useGetThreadsQuery,
     useGetThreadQuery,
+    useGetUserVotesQuery,
     useCreateThreadMutation,
     useAddReplyMutation,
-    useUpvoteThreadMutation,
-    useDownvoteThreadMutation,
+    useVoteThreadMutation,
     useDeleteThreadMutation,
     useDeleteReplyMutation,
 } = forumApi

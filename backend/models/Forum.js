@@ -52,6 +52,30 @@ export const Forum = {
         } finally {
             await connection.close();
         }
+
+        // FORUM_VOTES table for per-user vote tracking
+        const conn2 = await getConnection();
+        try {
+            const check3 = await conn2.execute(
+                `SELECT COUNT(*) FROM user_tables WHERE table_name = 'FORUM_VOTES'`
+            );
+            if (check3.rows[0][0] === 0) {
+                await conn2.execute(`
+                    CREATE TABLE forum_votes (
+                        vote_id       NUMBER PRIMARY KEY,
+                        thread_id     NUMBER NOT NULL,
+                        user_id       NUMBER NOT NULL,
+                        vote_type     VARCHAR2(10) NOT NULL,
+                        created_date  TIMESTAMP DEFAULT SYSTIMESTAMP,
+                        CONSTRAINT uq_forum_vote UNIQUE (thread_id, user_id)
+                    )
+                `);
+                await conn2.execute('COMMIT');
+                console.log('✓ Forum votes table created');
+            }
+        } finally {
+            await conn2.close();
+        }
     },
 
     // Get all threads sorted by vote score
@@ -155,41 +179,78 @@ export const Forum = {
         }
     },
 
-    // Upvote thread
-    upvote: async (threadId) => {
+    // Vote on thread (one vote per user, switch only - no unvoting)
+    vote: async (threadId, userId, voteType) => {
         const connection = await getConnection();
         try {
-            await connection.execute(
-                `UPDATE forum_threads SET upvotes = upvotes + 1 WHERE thread_id = :id`,
-                { id: threadId },
-                { autoCommit: true }
+            // Check existing vote
+            const existing = await connection.execute(
+                `SELECT vote_id, vote_type FROM forum_votes WHERE thread_id = :threadid AND user_id = :userid`,
+                { threadid: threadId, userid: userId },
+                { outFormat: oracledb.OUT_FORMAT_OBJECT }
             );
+
+            if (existing.rows.length > 0) {
+                const currentVote = existing.rows[0].VOTE_TYPE;
+                if (currentVote === voteType) {
+                    // Same vote — do nothing (already voted this way)
+                    const result = await connection.execute(
+                        `SELECT upvotes, downvotes FROM forum_threads WHERE thread_id = :id`,
+                        { id: threadId },
+                        { outFormat: oracledb.OUT_FORMAT_OBJECT }
+                    );
+                    return { ...result.rows[0], userVote: currentVote };
+                } else {
+                    // Different vote — switch
+                    await connection.execute(
+                        `UPDATE forum_votes SET vote_type = :votetype WHERE thread_id = :threadid AND user_id = :userid`,
+                        { votetype: voteType, threadid: threadId, userid: userId }
+                    );
+                    const oldCol = currentVote === 'up' ? 'upvotes' : 'downvotes';
+                    const newCol = voteType === 'up' ? 'upvotes' : 'downvotes';
+                    await connection.execute(
+                        `UPDATE forum_threads SET ${oldCol} = GREATEST(${oldCol} - 1, 0), ${newCol} = ${newCol} + 1 WHERE thread_id = :id`,
+                        { id: threadId }
+                    );
+                }
+            } else {
+                // New vote
+                const idResult = await connection.execute('SELECT NVL(MAX(vote_id), 0) + 1 FROM forum_votes');
+                const voteId = idResult.rows[0][0];
+                await connection.execute(
+                    `INSERT INTO forum_votes (vote_id, thread_id, user_id, vote_type) VALUES (:voteid, :threadid, :userid, :votetype)`,
+                    { voteid: voteId, threadid: threadId, userid: userId, votetype: voteType }
+                );
+                const col = voteType === 'up' ? 'upvotes' : 'downvotes';
+                await connection.execute(
+                    `UPDATE forum_threads SET ${col} = ${col} + 1 WHERE thread_id = :id`,
+                    { id: threadId }
+                );
+            }
+
+            await connection.execute('COMMIT');
+
             const result = await connection.execute(
                 `SELECT upvotes, downvotes FROM forum_threads WHERE thread_id = :id`,
                 { id: threadId },
                 { outFormat: oracledb.OUT_FORMAT_OBJECT }
             );
-            return result.rows[0];
+            return { ...result.rows[0], userVote: voteType };
         } finally {
             await connection.close();
         }
     },
 
-    // Downvote thread
-    downvote: async (threadId) => {
+    // Get user's votes for all threads
+    getUserVotes: async (userId) => {
         const connection = await getConnection();
         try {
-            await connection.execute(
-                `UPDATE forum_threads SET downvotes = downvotes + 1 WHERE thread_id = :id`,
-                { id: threadId },
-                { autoCommit: true }
-            );
             const result = await connection.execute(
-                `SELECT upvotes, downvotes FROM forum_threads WHERE thread_id = :id`,
-                { id: threadId },
+                `SELECT thread_id, vote_type FROM forum_votes WHERE user_id = :userid`,
+                { userid: userId },
                 { outFormat: oracledb.OUT_FORMAT_OBJECT }
             );
-            return result.rows[0];
+            return result.rows;
         } finally {
             await connection.close();
         }

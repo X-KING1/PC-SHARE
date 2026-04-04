@@ -7,6 +7,7 @@ import { loginUser, clearError, resetStatus } from '../store/authSlice'
 import { STATUS } from '../globals/Status'
 import { toast } from 'react-toastify'
 import Modal from './Modal'
+import config from '../config'
 
 const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     const dispatch = useDispatch()
@@ -65,7 +66,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
 
         setIsLoading(true)
         try {
-            const response = await fetch('http://localhost:5000/api/users/forgot-password', {
+            const response = await fetch(`${config.API_BASE}/api/users/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: formData.email })
@@ -107,7 +108,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
 
         setIsLoading(true)
         try {
-            const response = await fetch('http://localhost:5000/api/users/reset-password', {
+            const response = await fetch(`${config.API_BASE}/api/users/reset-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -222,7 +223,7 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
 
                     {/* GitHub Login */}
                     <a
-                        href="http://localhost:5000/api/auth/github/switch"
+                        href={`${config.API_BASE}/api/auth/github/switch`}
                         className="btn-github"
                     >
                         <svg className="github-icon" fill="currentColor" viewBox="0 0 24 24">

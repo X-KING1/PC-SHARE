@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartELearn Database Schema</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #0f172a; color: #e2e8f0; padding: 30px; }
+        h1 { text-align: center; font-size: 28px; margin-bottom: 8px; color: #38bdf8; }
+        .subtitle { text-align: center; color: #94a3b8; font-size: 14px; margin-bottom: 30px; }
+        .section { margin-bottom: 40px; }
+        .section-title { font-size: 20px; color: #f1f5f9; margin-bottom: 15px; border-left: 4px solid #38bdf8; padding-left: 12px; }
+        
+        /* Table List */
+        .table-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 30px; }
+        .table-card { background: linear-gradient(135deg, #1e293b, #1e3a5f); border: 1px solid #334155; border-radius: 10px; padding: 16px; text-align: center; transition: transform 0.2s; }
+        .table-card:hover { transform: translateY(-2px); border-color: #38bdf8; }
+        .table-card .icon { font-size: 24px; margin-bottom: 6px; }
+        .table-card .name { font-weight: 600; font-size: 13px; color: #f1f5f9; }
+        .table-card .rows { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+        /* Schema Table */
+        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 10px; overflow: hidden; }
+        th { background: #0ea5e9; color: #fff; padding: 10px 14px; text-align: left; font-size: 13px; font-weight: 600; }
+        td { padding: 8px 14px; border-bottom: 1px solid #334155; font-size: 12px; }
+        tr:hover td { background: #1e3a5f; }
+        .pk { color: #fbbf24; font-weight: bold; }
+        .fk { color: #a78bfa; font-weight: bold; }
+        .type { color: #38bdf8; }
+        .tbl-header { background: #0f172a; }
+        .tbl-header td { font-weight: 700; font-size: 14px; color: #38bdf8; padding: 12px 14px; border-bottom: 2px solid #38bdf8; }
+
+        /* Relationship Diagram */
+        .rel-container { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+        .rel-card { background: #1e293b; border: 1px solid #334155; border-radius: 10px; padding: 15px 20px; min-width: 280px; }
+        .rel-card .from { color: #38bdf8; font-weight: 600; font-size: 14px; }
+        .rel-card .arrow { color: #fbbf24; margin: 5px 0; font-size: 18px; }
+        .rel-card .to { color: #a78bfa; font-weight: 600; font-size: 14px; }
+        .rel-card .desc { color: #94a3b8; font-size: 11px; margin-top: 5px; }
+        
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        .badge-pk { background: #fbbf24; color: #000; }
+        .badge-nn { background: #ef4444; color: #fff; }
+        .badge-def { background: #22c55e; color: #000; }
+
+        .footer { text-align: center; margin-top: 30px; color: #64748b; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<h1>🗄️ SmartELearn Database Schema</h1>
+<p class="subtitle">Oracle 19c — LEARNHUB Schema | 15 Tables • 8 Views • 9 Sequences</p>
+
+<!-- SECTION 1: TABLE LIST -->
+<div class="section">
+    <div class="section-title">📋 Database Tables (15 Tables)</div>
+    <div class="table-grid">
+        <div class="table-card"><div class="icon">📚</div><div class="name">COURSES</div><div class="rows">400 rows</div></div>
+        <div class="table-card"><div class="icon">💬</div><div class="name">COURSE_COMMENTS</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">📝</div><div class="name">ENROLLMENTS</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">💬</div><div class="name">FORUM_REPLIES</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">📰</div><div class="name">FORUM_THREADS</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">🎥</div><div class="name">LIVE_SESSIONS</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">💳</div><div class="name">PAYMENTS</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">❓</div><div class="name">QUESTIONS</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">📋</div><div class="name">QUIZZES</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">🎯</div><div class="name">QUIZ_ATTEMPTS</div><div class="rows">148 rows</div></div>
+        <div class="table-card"><div class="icon">✅</div><div class="name">USER_ANSWERS</div><div class="rows">297 rows</div></div>
+        <div class="table-card"><div class="icon">⭐</div><div class="name">USER_INTERACTIONS</div><div class="rows">45,040 rows</div></div>
+        <div class="table-card"><div class="icon">👤</div><div class="name">USER_PROFILES</div><div class="rows">1,033 rows</div></div>
+        <div class="table-card"><div class="icon">▶️</div><div class="name">VIDEO_WATCHES</div><div class="rows">0 rows</div></div>
+        <div class="table-card"><div class="icon">🎬</div><div class="name">YOUTUBE_VIDEOS</div><div class="rows">0 rows</div></div>
+    </div>
+</div>
+
+<!-- SECTION 2: DATABASE SCHEMA -->
+<div class="section">
+    <div class="section-title">🏗️ Database Schema (Column Details)</div>
+    <table>
+        <thead><tr><th>Table</th><th>Column</th><th>Type</th><th>Key</th><th>Nullable</th><th>Default</th></tr></thead>
+        <tbody>
+            <tr class="tbl-header"><td colspan="6">COURSES</td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>TITLE</td><td class="type">VARCHAR2(500)</td><td></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>DESCRIPTION</td><td class="type">CLOB</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>CATEGORY</td><td class="type">VARCHAR2(200)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>SUBCATEGORY</td><td class="type">VARCHAR2(200)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>COURSE_LEVEL</td><td class="type">VARCHAR2(50)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>DURATION_MINUTES</td><td class="type">NUMBER</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>RATING</td><td class="type">NUMBER(3,2)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>NUM_REVIEWS</td><td class="type">NUMBER</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>YOUTUBE_URL</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>THUMBNAIL_URL</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>INSTRUCTOR</td><td class="type">VARCHAR2(200)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>CREATED_DATE</td><td class="type">DATE</td><td></td><td>YES</td><td>SYSDATE</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">USER_PROFILES</td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USERNAME</td><td class="type">VARCHAR2(100)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>EMAIL</td><td class="type">VARCHAR2(200)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>SKILL_LEVEL</td><td class="type">VARCHAR2(50)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>PREFERRED_CATEGORIES</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>LEARNING_GOALS</td><td class="type">CLOB</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>PASSWORD_HASH</td><td class="type">VARCHAR2(255)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>OTP_CODE</td><td class="type">VARCHAR2(6)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>OTP_EXPIRES</td><td class="type">TIMESTAMP(6)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>GITHUB_ID</td><td class="type">VARCHAR2(50)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>GITHUB_USERNAME</td><td class="type">VARCHAR2(100)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>AVATAR_URL</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>ROLE</td><td class="type">VARCHAR2(20)</td><td></td><td>YES</td><td>'student'</td></tr>
+            <tr><td></td><td>CREATED_DATE</td><td class="type">DATE</td><td></td><td>YES</td><td>SYSDATE</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">ENROLLMENTS</td></tr>
+            <tr><td></td><td>ENROLLMENT_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→COURSES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>ENROLLMENT_DATE</td><td class="type">DATE</td><td></td><td>YES</td><td>SYSDATE</td></tr>
+            <tr><td></td><td>PROGRESS_PERCENT</td><td class="type">NUMBER(5,2)</td><td></td><td>YES</td><td>0</td></tr>
+            <tr><td></td><td>COMPLETED</td><td class="type">NUMBER(1,0)</td><td></td><td>YES</td><td>0</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">QUIZZES</td></tr>
+            <tr><td></td><td>QUIZ_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→COURSES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>TITLE</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>DESCRIPTION</td><td class="type">CLOB</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>PASSING_SCORE</td><td class="type">NUMBER</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>TIME_LIMIT_MINUTES</td><td class="type">NUMBER</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>CREATED_DATE</td><td class="type">DATE</td><td></td><td>YES</td><td>SYSDATE</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">QUESTIONS</td></tr>
+            <tr><td></td><td>QUESTION_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>QUIZ_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→QUIZZES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>QUESTION_TEXT</td><td class="type">CLOB</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>OPTION_A</td><td class="type">VARCHAR2(1000)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>OPTION_B</td><td class="type">VARCHAR2(1000)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>OPTION_C</td><td class="type">VARCHAR2(1000)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>OPTION_D</td><td class="type">VARCHAR2(1000)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>CORRECT_ANSWER</td><td class="type">VARCHAR2(10)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>EXPLANATION</td><td class="type">CLOB</td><td></td><td>YES</td><td></td></tr>
+
+            <tr class="tbl-header"><td colspan="6">QUIZ_ATTEMPTS</td></tr>
+            <tr><td></td><td>ATTEMPT_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>QUIZ_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→QUIZZES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>SCORE</td><td class="type">NUMBER</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>PASSED</td><td class="type">NUMBER(1,0)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>STARTED_AT</td><td class="type">TIMESTAMP(6)</td><td></td><td>YES</td><td>SYSTIMESTAMP</td></tr>
+            <tr><td></td><td>COMPLETED_AT</td><td class="type">TIMESTAMP(6)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>TOTAL_SCORE</td><td class="type">NUMBER(10,2)</td><td></td><td>YES</td><td>0</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">USER_ANSWERS</td></tr>
+            <tr><td></td><td>ANSWER_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>ATTEMPT_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→QUIZ_ATTEMPTS</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>QUESTION_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→QUESTIONS</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>SELECTED_ANSWER</td><td class="type">VARCHAR2(10)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>IS_CORRECT</td><td class="type">NUMBER(1,0)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>POINTS_EARNED</td><td class="type">NUMBER(10,2)</td><td></td><td>YES</td><td>0</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">USER_INTERACTIONS</td></tr>
+            <tr><td></td><td>INTERACTION_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→COURSES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>INTERACTION_TYPE</td><td class="type">VARCHAR2(50)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>RATING</td><td class="type">NUMBER(3,2)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>WATCH_TIME_MINUTES</td><td class="type">NUMBER</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>COMPLETED</td><td class="type">NUMBER(1,0)</td><td></td><td>YES</td><td>0</td></tr>
+            <tr><td></td><td>INTERACTION_DATE</td><td class="type">DATE</td><td></td><td>YES</td><td>SYSDATE</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">COURSE_COMMENTS</td></tr>
+            <tr><td></td><td>COMMENT_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→COURSES</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>COMMENT_TEXT</td><td class="type">VARCHAR2(2000)</td><td></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>CREATED_AT</td><td class="type">TIMESTAMP(6)</td><td></td><td>YES</td><td>SYSTIMESTAMP</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">FORUM_THREADS</td></tr>
+            <tr><td></td><td>THREAD_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>AUTHOR</td><td class="type">VARCHAR2(100)</td><td></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>TITLE</td><td class="type">VARCHAR2(500)</td><td></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>CONTENT</td><td class="type">CLOB</td><td></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>IMAGE_URL</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>UPVOTES</td><td class="type">NUMBER</td><td></td><td>YES</td><td>0</td></tr>
+            <tr><td></td><td>DOWNVOTES</td><td class="type">NUMBER</td><td></td><td>YES</td><td>0</td></tr>
+            <tr><td></td><td>CREATED_DATE</td><td class="type">TIMESTAMP(6)</td><td></td><td>YES</td><td>SYSTIMESTAMP</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">FORUM_REPLIES</td></tr>
+            <tr><td></td><td>REPLY_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>THREAD_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→FORUM_THREADS</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>AUTHOR</td><td class="type">VARCHAR2(100)</td><td></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>CONTENT</td><td class="type">CLOB</td><td></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>IMAGE_URL</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>CREATED_DATE</td><td class="type">TIMESTAMP(6)</td><td></td><td>YES</td><td>SYSTIMESTAMP</td></tr>
+
+            <tr class="tbl-header"><td colspan="6">PAYMENTS</td></tr>
+            <tr><td></td><td>PAYMENT_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→COURSES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>PROVIDER</td><td class="type">VARCHAR2(20)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>AMOUNT</td><td class="type">NUMBER(10,2)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>CURRENCY</td><td class="type">VARCHAR2(10)</td><td></td><td>YES</td><td>'usd'</td></tr>
+            <tr><td></td><td>STATUS</td><td class="type">VARCHAR2(30)</td><td></td><td>YES</td><td>'pending'</td></tr>
+            <tr><td></td><td>TRANSACTION_ID</td><td class="type">VARCHAR2(255)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>EMAIL</td><td class="type">VARCHAR2(255)</td><td></td><td>YES</td><td></td></tr>
+
+            <tr class="tbl-header"><td colspan="6">LIVE_SESSIONS</td></tr>
+            <tr><td></td><td>SESSION_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→COURSES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>MENTOR_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>MENTOR_NAME</td><td class="type">VARCHAR2(200)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>TITLE</td><td class="type">VARCHAR2(300)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>SESSION_DATE</td><td class="type">VARCHAR2(20)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>STATUS</td><td class="type">VARCHAR2(20)</td><td></td><td>YES</td><td>'available'</td></tr>
+            <tr><td></td><td>ROOM_ID</td><td class="type">VARCHAR2(100)</td><td></td><td>YES</td><td></td></tr>
+
+            <tr class="tbl-header"><td colspan="6">VIDEO_WATCHES</td></tr>
+            <tr><td></td><td>WATCH_ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>USER_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→USER_PROFILES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→COURSES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>VIDEO_ID</td><td class="type">VARCHAR2(50)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>WATCH_DURATION_SECONDS</td><td class="type">NUMBER</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>COMPLETED</td><td class="type">NUMBER(1,0)</td><td></td><td>YES</td><td></td></tr>
+
+            <tr class="tbl-header"><td colspan="6">YOUTUBE_VIDEOS</td></tr>
+            <tr><td></td><td>ID</td><td class="type">NUMBER</td><td><span class="badge badge-pk">PK</span></td><td>NO</td><td></td></tr>
+            <tr><td></td><td>COURSE_ID</td><td class="type">NUMBER</td><td><span class="fk">FK→COURSES</span></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>COURSE_TITLE</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>URL</td><td class="type">VARCHAR2(500)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>IS_PAID</td><td class="type">NUMBER(1,0)</td><td></td><td>YES</td><td></td></tr>
+            <tr><td></td><td>PRICE</td><td class="type">NUMBER</td><td></td><td>YES</td><td></td></tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- SECTION 3: RELATIONSHIPS -->
+<div class="section">
+    <div class="section-title">🔗 Table Relationships (Entity Relationships)</div>
+    <div class="rel-container">
+        <div class="rel-card">
+            <div class="from">👤 USER_PROFILES (user_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">📝 ENROLLMENTS (user_id)</div>
+            <div class="desc">A user can enroll in many courses</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">📚 COURSES (course_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">📝 ENROLLMENTS (course_id)</div>
+            <div class="desc">A course has many enrollments</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">📚 COURSES (course_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">📋 QUIZZES (course_id)</div>
+            <div class="desc">Each course can have multiple quizzes</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">📋 QUIZZES (quiz_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">❓ QUESTIONS (quiz_id)</div>
+            <div class="desc">Each quiz has multiple questions</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">👤 USER_PROFILES (user_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">🎯 QUIZ_ATTEMPTS (user_id)</div>
+            <div class="desc">A user can attempt multiple quizzes</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">🎯 QUIZ_ATTEMPTS (attempt_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">✅ USER_ANSWERS (attempt_id)</div>
+            <div class="desc">Each attempt has multiple answers</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">👤 USER_PROFILES (user_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">⭐ USER_INTERACTIONS (user_id)</div>
+            <div class="desc">Users interact (rate/watch) with courses</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">👤 USER_PROFILES (user_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">💬 COURSE_COMMENTS (user_id)</div>
+            <div class="desc">Users can comment on courses</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">👤 USER_PROFILES (user_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">📰 FORUM_THREADS (user_id)</div>
+            <div class="desc">Users create forum threads</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">📰 FORUM_THREADS (thread_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">💬 FORUM_REPLIES (thread_id)</div>
+            <div class="desc">Threads can have many replies</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">👤 USER_PROFILES (user_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">💳 PAYMENTS (user_id)</div>
+            <div class="desc">Users make payments for courses</div>
+        </div>
+        <div class="rel-card">
+            <div class="from">📚 COURSES (course_id)</div>
+            <div class="arrow">──── 1:N ────▶</div>
+            <div class="to">🎥 LIVE_SESSIONS (course_id)</div>
+            <div class="desc">Courses have live mentoring sessions</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">SmartELearn — Oracle 19c Database • Generated March 2026</div>
+
+</body>
+</html>

@@ -227,9 +227,9 @@ const CourseDetail = () => {
             {/* ════════════════════════════════════════════════
                 SECTION 1 — HERO (Dark)
                ════════════════════════════════════════════════ */}
-            <div className="bg-neutral-950">
+            <div className="bg-gradient-to-br from-neutral-950 via-neutral-950 to-neutral-900">
                 <div className="max-w-[1400px] mx-auto px-4 py-10 lg:py-14">
-                    <div className="flex gap-10 items-start flex-col lg:flex-row">
+                    <div className="flex gap-10 items-start flex-col lg:flex-row-reverse">
                         {/* Left: Course Info */}
                         <div className="flex-1 min-w-0 lg:pt-1">
                             {/* Breadcrumb */}
@@ -285,7 +285,7 @@ const CourseDetail = () => {
                         </div>
 
                         {/* Right: Video Preview */}
-                        <div className="w-full lg:w-[480px] flex-shrink-0">
+                        <div className="w-full lg:w-[520px] flex-shrink-0">
                             {trialMode === "playing" && course.youtube_url ? (
                                 <div>
                                     <div className="rounded-xl overflow-hidden border border-neutral-700 shadow-2xl">
@@ -339,61 +339,78 @@ const CourseDetail = () => {
                 <div className="flex gap-8 items-start flex-col lg:flex-row">
 
                     {/* ── LEFT COLUMN ── */}
-                    <div className="flex-1 min-w-0 space-y-10">
+                    <div className="flex-1 min-w-0 space-y-8">
 
-                        {/* 3. What you'll learn (accent border) */}
-                        <section className="border border-neutral-200 border-l-4 border-l-neutral-900 rounded-xl p-6">
-                            <h2 className="text-[18px] font-bold text-neutral-900 mb-5">What you'll learn</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                                {["Build dynamic web applications from scratch", "Create modern UIs with React components", "Develop frontend with React and hooks", "Deploy applications to the cloud", "Create backend APIs with Node.js & Express", "Understand database design patterns"].map((item, i) => (
-                                    <div key={i} className="flex items-start gap-2.5">
-                                        <Icons.check />
-                                        <span className="text-[14px] text-neutral-600 leading-snug">{item}</span>
-                                    </div>
-                                ))}
+                        {/* What you'll learn — Premium Card */}
+                        <section className="bg-white rounded-2xl border border-neutral-200 overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                            <div className="bg-neutral-900 px-6 py-4">
+                                <h2 className="text-[17px] font-bold text-white flex items-center gap-2">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                    What you'll learn
+                                </h2>
+                            </div>
+                            <div className="p-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {["Build dynamic web applications from scratch", "Create modern UIs with React components", "Develop frontend with React and hooks", "Deploy applications to the cloud", "Create backend APIs with Node.js & Express", "Understand database design patterns"].map((item, i) => (
+                                        <div key={i} className="flex items-start gap-3 bg-neutral-50 rounded-xl px-4 py-3">
+                                            <div className="w-5 h-5 rounded-full bg-neutral-900 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                            </div>
+                                            <span className="text-[14px] text-neutral-700 leading-snug font-medium">{item}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </section>
 
-                        {/* 4. Course Content (Accordion) */}
-                        <section>
-                            <div className="flex items-center justify-between mb-4">
-                                <div>
-                                    <h2 className="text-[18px] font-bold text-neutral-900">Course Content</h2>
-                                    <p className="text-[12px] text-neutral-400 mt-1">{modules.length} sections · {quizzes.length} quizzes · 12h 30m total length</p>
+                        {/* Course Content — Premium Accordion */}
+                        <section className="bg-white rounded-2xl border border-neutral-200 overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                            <div className="px-6 py-5 border-b border-neutral-100">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h2 className="text-[17px] font-bold text-neutral-900 flex items-center gap-2">
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#171717" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                                            Course Content
+                                        </h2>
+                                        <p className="text-[12px] text-neutral-400 mt-1">{modules.length} sections · {quizzes.length} quizzes · 12h 30m total</p>
+                                    </div>
+                                    <button onClick={toggleExpandAll}
+                                        className="text-[12px] font-bold text-neutral-600 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 px-3.5 py-1.5 rounded-lg transition-all">
+                                        {allExpanded ? 'Collapse all' : 'Expand all'}
+                                    </button>
                                 </div>
-                                <button onClick={toggleExpandAll}
-                                    className="text-[13px] font-semibold text-neutral-900 underline underline-offset-2 decoration-neutral-300 hover:decoration-neutral-900 transition-colors">
-                                    {allExpanded ? 'Collapse all' : 'Expand all'}
-                                </button>
                             </div>
 
                             {modules.length > 0 ? (
-                                <div className="border border-neutral-200 rounded-xl overflow-hidden divide-y divide-neutral-100">
+                                <div className="divide-y divide-neutral-100">
                                     {modules.map((mod, idx) => {
                                         const isOpen = allExpanded || expandedSection === idx
                                         return (
                                             <div key={idx}>
                                                 <button onClick={() => { if (!allExpanded) setExpandedSection(isOpen ? -1 : idx) }}
-                                                    className="w-full flex items-center gap-3 px-5 py-4.5 hover:bg-neutral-50 transition-colors text-left bg-neutral-50/50">
-                                                    <Icons.chevron open={isOpen} />
+                                                    className="w-full flex items-center gap-3 px-6 py-4 hover:bg-neutral-50/80 transition-colors text-left">
+                                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${isOpen ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-500'}`}>
+                                                        <Icons.chevron open={isOpen} />
+                                                    </div>
                                                     <span className="text-[14px] font-semibold text-neutral-900 flex-1">Module {idx + 1}: {mod.name}</span>
-                                                    <span className="text-[11px] text-neutral-400 font-medium bg-neutral-100 px-2 py-0.5 rounded">{mod.items.length} lessons + quiz</span>
-                                                    <span className="text-[11px] text-neutral-300 font-medium hidden sm:inline">1h 20m</span>
+                                                    <span className="text-[11px] text-neutral-400 font-medium bg-neutral-100 px-2.5 py-1 rounded-md">{mod.items.length} lessons</span>
                                                 </button>
 
                                                 {isOpen && (
-                                                    <div className="bg-white divide-y divide-neutral-50">
+                                                    <div className="bg-neutral-50/50 divide-y divide-neutral-100/80">
                                                         {mod.items.map((quiz, i) => (
-                                                            <div key={quiz.quiz_id} className="flex items-center gap-3 px-5 py-3 pl-12 hover:bg-neutral-50 transition-colors">
-                                                                <Icons.quiz />
+                                                            <div key={quiz.quiz_id} className="flex items-center gap-3 px-6 py-3 pl-16 hover:bg-white/80 transition-colors">
+                                                                <div className="w-5 h-5 rounded bg-neutral-200 flex items-center justify-center flex-shrink-0">
+                                                                    <Icons.quiz />
+                                                                </div>
                                                                 <span className="text-[13px] text-neutral-700 flex-1">{quiz.title}</span>
                                                                 <Icons.lock />
                                                                 <span className="text-[11px] text-neutral-400 flex items-center gap-1"><Icons.clock /> {quiz.time_limit}m</span>
                                                             </div>
                                                         ))}
-                                                        <div className="px-5 py-3 pl-12 bg-amber-50/50">
-                                                            <span className="text-[12px] text-amber-700 flex items-center gap-1.5 font-medium">
-                                                                <Icons.lock /> Purchase to unlock all content
+                                                        <div className="px-6 py-3 pl-16 bg-neutral-100/70">
+                                                            <span className="text-[12px] text-neutral-600 flex items-center gap-1.5 font-semibold">
+                                                                <Icons.lock /> Enroll to unlock all content
                                                             </span>
                                                         </div>
                                                     </div>
@@ -403,111 +420,123 @@ const CourseDetail = () => {
                                     })}
                                 </div>
                             ) : (
-                                <div className="border border-dashed border-neutral-200 rounded-xl py-10 text-center">
-                                    <p className="text-neutral-400 text-[13px]">No content available yet.</p>
+                                <div className="py-14 text-center">
+                                    <div className="w-14 h-14 rounded-2xl bg-neutral-100 flex items-center justify-center mx-auto mb-3">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#a3a3a3" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                                    </div>
+                                    <p className="text-neutral-500 text-[14px] font-medium">No content available yet</p>
+                                    <p className="text-neutral-400 text-[12px] mt-1">Content is being prepared</p>
                                 </div>
                             )}
                         </section>
 
-                        {/* Requirements */}
-                        <section className="border border-neutral-200 rounded-xl p-6">
-                            <h2 className="text-[18px] font-bold text-neutral-900 mb-4">Requirements</h2>
+                        {/* Requirements — Clean Card */}
+                        <section className="bg-white rounded-2xl border border-neutral-200 p-6" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                            <h2 className="text-[17px] font-bold text-neutral-900 mb-5 flex items-center gap-2">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#171717" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                Requirements
+                            </h2>
                             <ul className="space-y-3">
                                 {[
                                     "Basic understanding of HTML and CSS",
                                     "A computer with internet access",
                                     "No prior programming experience required"
                                 ].map((item, i) => (
-                                    <li key={i} className="flex items-center gap-3 text-[14px] text-neutral-600">
-                                        <span className="w-1.5 h-1.5 bg-neutral-900 rounded-full flex-shrink-0" />
-                                        {item}
+                                    <li key={i} className="flex items-center gap-3 text-[14px] text-neutral-600 bg-neutral-50 rounded-xl px-4 py-3">
+                                        <span className="w-2 h-2 bg-neutral-900 rounded-full flex-shrink-0" />
+                                        <span className="font-medium">{item}</span>
                                     </li>
                                 ))}
                             </ul>
                         </section>
 
-                        {/* 5. Instructor */}
-                        <section>
-                            <h2 className="text-[18px] font-bold text-neutral-900 mb-5">Instructor</h2>
-                            <div className="flex items-start gap-5">
-                                <div className="w-20 h-20 rounded-full bg-neutral-900 flex items-center justify-center text-white text-[28px] font-bold flex-shrink-0">
-                                    {course.instructor?.charAt(0).toUpperCase() || "A"}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-[18px] font-bold text-neutral-900 underline underline-offset-2 decoration-neutral-300 mb-1">
-                                        {course.instructor || "Alex Johnson"}
-                                    </h3>
-                                    <p className="text-[13px] text-neutral-400 mb-3">Senior {course.category} Developer & Instructor</p>
-
-                                    <div className="flex items-center gap-2 mb-4 flex-wrap">
-                                        <span className="text-[12px] font-medium text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-md flex items-center gap-1">
-                                            <Icons.star filled color="#171717" /> 4.8 Rating
-                                        </span>
-                                        <span className="text-[12px] font-medium text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-md">50k Students</span>
-                                        <span className="text-[12px] font-medium text-neutral-600 bg-neutral-100 px-2.5 py-1 rounded-md">12 Courses</span>
+                        {/* Instructor — Premium Card */}
+                        <section className="bg-white rounded-2xl border border-neutral-200 overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                            <div className="bg-gradient-to-r from-neutral-900 to-neutral-800 px-6 py-5">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 rounded-2xl bg-neutral-900 flex items-center justify-center text-white text-[24px] font-bold flex-shrink-0 shadow-lg shadow-neutral-900/20">
+                                        {course.instructor?.charAt(0).toUpperCase() || "A"}
                                     </div>
-
-                                    <p className="text-[15px] text-neutral-500 leading-relaxed">
-                                        {course.instructor || "Alex"} is a seasoned developer with over 10 years of experience.
-                                        Passionate about teaching, helping thousands of students start their careers in tech through hands-on, practical courses.
-                                    </p>
+                                    <div>
+                                        <h3 className="text-[18px] font-bold text-white">{course.instructor || "Alex Johnson"}</h3>
+                                        <p className="text-[13px] text-neutral-400">Senior {course.category} Developer & Instructor</p>
+                                    </div>
                                 </div>
+                            </div>
+                            <div className="p-6">
+                                <div className="flex items-center gap-2 mb-4 flex-wrap">
+                                    <span className="text-[12px] font-semibold text-neutral-700 bg-neutral-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                                        <Icons.star filled color="#171717" /> 4.8 Rating
+                                    </span>
+                                    <span className="text-[12px] font-semibold text-neutral-600 bg-neutral-100 px-3 py-1.5 rounded-lg">50k Students</span>
+                                    <span className="text-[12px] font-semibold text-neutral-600 bg-neutral-100 px-3 py-1.5 rounded-lg">12 Courses</span>
+                                </div>
+                                <p className="text-[14px] text-neutral-500 leading-relaxed">
+                                    {course.instructor || "Alex"} is a seasoned developer with over 10 years of experience.
+                                    Passionate about teaching, helping thousands of students start their careers in tech through hands-on, practical courses.
+                                </p>
                             </div>
                         </section>
 
-                        {/* 6. Reviews (NEW) */}
-                        <section>
-                            <div className="flex items-center justify-between mb-5">
-                                <h2 className="text-[18px] font-bold text-neutral-900">Student Reviews</h2>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-[22px] font-black text-neutral-900">{course.rating || "4.9"}</span>
-                                    <div>
-                                        <StarRow rating={roundedRating} />
-                                        <p className="text-[10px] text-neutral-400 mt-0.5">Course rating</p>
+                        {/* Student Reviews — Enhanced */}
+                        <section className="bg-white rounded-2xl border border-neutral-200 overflow-hidden" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.04)' }}>
+                            <div className="px-6 py-5 border-b border-neutral-100">
+                                <div className="flex items-center justify-between">
+                                    <h2 className="text-[17px] font-bold text-neutral-900 flex items-center gap-2">
+                                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#171717" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                        Student Reviews
+                                    </h2>
+                                    <div className="flex items-center gap-3 bg-neutral-100 px-4 py-2 rounded-xl">
+                                        <span className="text-[24px] font-black text-neutral-900">{course.rating || "4.9"}</span>
+                                        <div>
+                                            <StarRow rating={roundedRating} color="#fbbf24" />
+                                            <p className="text-[10px] text-neutral-500 mt-0.5 font-medium">Course rating</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Rating distribution bars */}
-                            <div className="mb-6 space-y-1.5">
-                                {[
-                                    { stars: 5, pct: 78 },
-                                    { stars: 4, pct: 15 },
-                                    { stars: 3, pct: 5 },
-                                    { stars: 2, pct: 1 },
-                                    { stars: 1, pct: 1 },
-                                ].map(row => (
-                                    <div key={row.stars} className="flex items-center gap-2">
-                                        <div className="flex items-center gap-0.5 w-16 justify-end">
-                                            <StarRow rating={row.stars} />
-                                        </div>
-                                        <div className="flex-1 h-2 bg-neutral-100 rounded-full overflow-hidden">
-                                            <div className="h-full bg-neutral-900 rounded-full" style={{ width: `${row.pct}%` }} />
-                                        </div>
-                                        <span className="text-[11px] text-neutral-400 w-8 text-right">{row.pct}%</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Review cards */}
-                            <div className="space-y-4">
-                                {REVIEWS.map((review, i) => (
-                                    <div key={i} className="border border-neutral-200 rounded-xl p-5">
-                                        <div className="flex items-center gap-3 mb-3">
-                                            <div className="w-9 h-9 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-600 text-[13px] font-bold flex-shrink-0">
-                                                {review.initial}
+                            <div className="p-6 space-y-6">
+                                {/* Rating bars */}
+                                <div className="space-y-2">
+                                    {[
+                                        { stars: 5, pct: 78 },
+                                        { stars: 4, pct: 15 },
+                                        { stars: 3, pct: 5 },
+                                        { stars: 2, pct: 1 },
+                                        { stars: 1, pct: 1 },
+                                    ].map(row => (
+                                        <div key={row.stars} className="flex items-center gap-3">
+                                            <span className="text-[12px] text-neutral-500 font-semibold w-3 text-right">{row.stars}</span>
+                                            <Icons.star filled color="#fbbf24" />
+                                            <div className="flex-1 h-2.5 bg-neutral-100 rounded-full overflow-hidden">
+                                                <div className="h-full bg-neutral-900 rounded-full transition-all" style={{ width: `${row.pct}%` }} />
                                             </div>
-                                            <div className="flex-1">
-                                                <p className="text-[13px] font-semibold text-neutral-900">{review.name}</p>
-                                                <div className="flex items-center gap-1.5">
-                                                    <StarRow rating={review.rating} color="#171717" />
-                                                    <span className="text-[11px] text-neutral-400">2 weeks ago</span>
+                                            <span className="text-[12px] text-neutral-400 font-semibold w-10 text-right">{row.pct}%</span>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Review cards */}
+                                <div className="space-y-3">
+                                    {REVIEWS.map((review, i) => (
+                                        <div key={i} className="bg-neutral-50 rounded-xl p-5 hover:bg-neutral-100/80 transition-colors">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center text-white text-[14px] font-bold flex-shrink-0">
+                                                    {review.initial}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="text-[14px] font-bold text-neutral-900">{review.name}</p>
+                                                    <div className="flex items-center gap-2">
+                                                        <StarRow rating={review.rating} color="#fbbf24" />
+                                                        <span className="text-[11px] text-neutral-400">2 weeks ago</span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <p className="text-[14px] text-neutral-600 leading-relaxed">{review.text}</p>
                                         </div>
-                                        <p className="text-[14px] text-neutral-600 leading-relaxed">{review.text}</p>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
                         </section>
                     </div>
@@ -535,7 +564,7 @@ const CourseDetail = () => {
                             <div className="px-5 space-y-2 mb-4">
                                 {hasPurchased ? (
                                     <button onClick={() => navigate('/purchased-courses')}
-                                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-[15px] font-bold h-12 rounded-xl transition-colors flex items-center justify-center gap-2 group">
+                                        className="w-full bg-neutral-900 hover:bg-black text-white text-[15px] font-bold h-12 rounded-xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-neutral-900/15">
                                         <Icons.check /> Continue Learning
                                         <Icons.arrowRight />
                                     </button>
@@ -544,7 +573,7 @@ const CourseDetail = () => {
                                         if (!isAuthenticated) { alert('Please login first to purchase this course.'); return }
                                         setShowPaymentModal(true)
                                     }}
-                                        className="w-full bg-neutral-900 hover:bg-black text-white text-[15px] font-bold h-12 rounded-xl transition-colors flex items-center justify-center gap-2 group">
+                                        className="w-full bg-neutral-900 hover:bg-black text-white text-[15px] font-bold h-12 rounded-xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-neutral-900/15">
                                         Buy Now
                                         <span className="group-hover:translate-x-0.5 transition-transform"><Icons.arrowRight /></span>
                                     </button>
@@ -609,7 +638,7 @@ const CourseDetail = () => {
                 <section className="mt-14 border-t border-neutral-100 pt-10">
                     <button onClick={() => setShowComments(prev => !prev)}
                         className="flex items-center gap-3 mb-6 group cursor-pointer bg-transparent border-none p-0">
-                        <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center shadow-sm shadow-blue-600/20">
+                        <div className="w-9 h-9 rounded-lg bg-neutral-900 flex items-center justify-center shadow-sm">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
                             </svg>
@@ -630,7 +659,7 @@ const CourseDetail = () => {
                             {/* Comment Input */}
                             {isAuthenticated ? (
                                 <div className="flex gap-3 items-start">
-                                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center text-white text-[12px] font-bold flex-shrink-0 shadow-sm shadow-blue-600/20">
+                                    <div className="w-9 h-9 rounded-full bg-neutral-900 flex items-center justify-center text-white text-[12px] font-bold flex-shrink-0 shadow-sm">
                                         {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                                     </div>
                                     <div className="flex-1 relative">
@@ -647,7 +676,7 @@ const CourseDetail = () => {
                                                 }
                                             }}
                                             placeholder="Write a comment..."
-                                            className="w-full bg-slate-50 border border-slate-200 rounded-full px-4 py-2.5 pr-20 text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 focus:bg-white transition-all" />
+                                            className="w-full bg-slate-50 border border-slate-200 rounded-full px-4 py-2.5 pr-20 text-[13px] text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-400 focus:bg-white transition-all" />
                                         <button onClick={async () => {
                                             if (commentText.trim()) {
                                                 const text = commentText.trim()
@@ -660,7 +689,7 @@ const CourseDetail = () => {
                                             }
                                         }}
                                             disabled={!commentText.trim()}
-                                            className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full transition-all disabled:opacity-20 disabled:cursor-not-allowed shadow-sm shadow-blue-600/20">
+                                            className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-neutral-900 hover:bg-black text-white text-[11px] font-bold px-3.5 py-1.5 rounded-full transition-all disabled:opacity-20 disabled:cursor-not-allowed shadow-sm">
                                             Post
                                         </button>
                                     </div>

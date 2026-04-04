@@ -42,7 +42,8 @@ router.route('/github/callback').get(
         });
 
         // Redirect to frontend with token in URL
-        res.redirect(`http://localhost:5173/auth-callback?token=${token}&user=${encodeURIComponent(user)}`);
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/auth-callback?token=${token}&user=${encodeURIComponent(user)}`);
     }
 );
 
@@ -76,7 +77,8 @@ router.route('/logout').post((req, res) => {
 // GET /api/auth/logout - Logout (GET for browser redirect)
 router.route('/logout').get((req, res) => {
     req.logout((err) => {
-        res.redirect('http://localhost:5173/');
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/`);
     });
 });
 

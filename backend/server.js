@@ -22,6 +22,7 @@ import paymentRouter from './routes/paymentRoute.js';
 import forumRouter from './routes/forumRoute.js';
 import sessionRouter from './routes/sessionRoute.js';
 import adminRouter from './routes/adminRoute.js';
+import dashboardRouter from './routes/dashboardRoute.js';
 import { Payment } from './models/Payment.js';
 import { Forum } from './models/Forum.js';
 import { LiveSession } from './models/LiveSession.js';
@@ -49,6 +50,7 @@ connectOracle().then(async () => {
     try { await Forum.initTables(); } catch (e) { /* tables may already exist */ }
     try { await LiveSession.initTable(); } catch (e) { /* table may already exist */ }
     try { await User.ensureRoleColumn(); } catch (e) { /* column may already exist */ }
+    try { await User.ensureProfileImageColumn(); } catch (e) { /* column may already exist */ }
     try { await Interaction.initCommentsTable(); } catch (e) { /* table may already exist */ }
 }).catch(() => { });
 
@@ -56,7 +58,9 @@ connectOracle().then(async () => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(',')
+        : ['http://localhost:5173', 'http://localhost:5174'],
     credentials: true
 }));
 
@@ -66,7 +70,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false, // Set true in production with HTTPS
+        secure: process.env.NODE_ENV === 'production', // true in production with HTTPS
         maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
     }
 }));
@@ -85,7 +89,11 @@ app.use('/api/payment', paymentRouter);
 app.use('/api/forum', forumRouter);
 app.use('/api/sessions', sessionRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/dashboard', dashboardRouter);
 app.use('/api', systemRouter);
+
+// Serve uploaded files (avatars etc.)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Serve static frontend files
 app.use(express.static(path.join(__dirname, '../frontend')));

@@ -4,7 +4,16 @@
 
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+let stripe = null;
+try {
+    if (process.env.STRIPE_SECRET_KEY) {
+        stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    } else {
+        console.warn('⚠ Stripe not configured - payment features disabled');
+    }
+} catch (e) {
+    console.warn('⚠ Stripe init failed:', e.message);
+}
 
 /**
  * Create a Stripe Checkout Session (hosted by Stripe)
